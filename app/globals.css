@@ -4,24 +4,227 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a1a2e;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --secondary: #f1f5f9;
+  --accent: #10b981;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --card: #ffffff;
+  --code-bg: #f8fafc;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --primary: #818cf8;
+  --primary-hover: #a5b4fc;
+  --secondary: #1e293b;
+  --accent: #34d399;
+  --muted: #94a3b8;
+  --border: #334155;
+  --card: #1e293b;
+  --code-bg: #1e293b;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Code block styling */
+pre {
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  background: var(--code-bg) !important;
+  border: 1px solid var(--border);
+}
+
+code {
+  font-family: var(--font-geist-mono), 'Fira Code', monospace;
+}
+
+/* Inline code */
+:not(pre) > code {
+  background: var(--secondary);
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}
+
+/* KaTeX styling */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}
+
+/* ASCII diagrams */
+.ascii-diagram {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  white-space: pre;
+  overflow-x: auto;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+/* Module content styling */
+.module-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.module-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--foreground);
+}
+
+.module-content p {
+  margin-bottom: 1rem;
+  line-height: 1.75;
+}
+
+.module-content ul, .module-content ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.module-content li {
+  margin-bottom: 0.5rem;
+}
+
+.module-content ul {
+  list-style-type: disc;
+}
+
+.module-content ol {
+  list-style-type: decimal;
+}
+
+.module-content table {
+  width: 100%;
+  margin-bottom: 1rem;
+  border-collapse: collapse;
+}
+
+.module-content th, .module-content td {
+  border: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.module-content th {
+  background: var(--secondary);
+  font-weight: 600;
+}
+
+.module-content strong {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* Quiz styling */
+.quiz-option {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--card);
+}
+
+.quiz-option:hover {
+  border-color: var(--primary);
+}
+
+.quiz-option.selected {
+  border-color: var(--primary);
+  background: rgba(79, 70, 229, 0.1);
+}
+
+.quiz-option.correct {
+  border-color: var(--accent);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.quiz-option.incorrect {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Animation for loading */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Sidebar active state */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.sidebar-link:hover {
+  background: var(--secondary);
+}
+
+.sidebar-link.active {
+  background: var(--primary);
+  color: white;
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 0.5rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: var(--secondary);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: all 0.5s;
+  background: var(--accent);
 }
