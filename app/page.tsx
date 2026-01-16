@@ -87,6 +87,13 @@ export default function Home() {
 
             <div className="flex items-center gap-3">
               <Link
+                href="/games"
+                className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-[var(--muted)] hover:text-foreground hover:bg-[var(--secondary)] transition-colors"
+              >
+                <Gamepad2 size={18} />
+                <span>Games</span>
+              </Link>
+              <Link
                 href="/modules/module-1"
                 className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[var(--secondary)] hover:bg-[var(--border)] transition-colors"
               >
