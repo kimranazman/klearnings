@@ -5,6 +5,7 @@ import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { SupervisedLearningDiagram } from "@/components/mdx/diagrams";
+import { PredictionGame } from "@/components/games";
 
 export default function Module1Content() {
   return (
@@ -253,6 +254,15 @@ X_scaled = scaler.transform(X_train)
 
 # Combined fit_transform (for training data only)
 X_train_scaled = scaler.fit_transform(X_train)`}</CodeBlock>
+
+      <h2>Practice: Guess the Regression Line</h2>
+      <p>
+        Test your intuition! Look at scatter plots and try to guess the slope and intercept
+        of the best-fit line. This game helps you develop an intuitive understanding of how
+        linear regression works.
+      </p>
+
+      <PredictionGame />
 
       <MustKnow
         moduleNumber={1}

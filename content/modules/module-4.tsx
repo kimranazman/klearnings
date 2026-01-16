@@ -5,6 +5,7 @@ import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { BiasVarianceTargetDiagram, RidgeLassoDiagram, RFEDiagram } from "@/components/mdx/diagrams";
+import { RegularizationGame } from "@/components/games";
 
 export default function Module4Content() {
   return (
@@ -234,6 +235,15 @@ rfe.fit(X_train_scaled, y_train)
 rfecv = RFECV(estimator, cv=5)
 rfecv.fit(X_train_scaled, y_train)
 print(f"Optimal features: {rfecv.n_features_}")`}</CodeBlock>
+
+      <h2>Practice: Tune the Regularization</h2>
+      <p>
+        Regularization strength (alpha) controls how many features survive. Can you find the
+        right balance? Adjust the alpha slider to keep only the important features while
+        eliminating noise.
+      </p>
+
+      <RegularizationGame />
 
       <MustKnow
         moduleNumber={4}

@@ -5,6 +5,7 @@ import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { ConstraintRegionsDiagram, PriorDistributionsDiagram, FeatureScalingDiagram, AlphaEffectDiagram } from "@/components/mdx/diagrams";
+import { CoefficientMatchingGame } from "@/components/games";
 
 export default function Module5Content() {
   return (
@@ -279,6 +280,14 @@ print(f"R2 Score: {r2:.4f}")`}</CodeBlock>
           </tbody>
         </table>
       </div>
+
+      <h2>Practice: Choose the Right Gradient Descent</h2>
+      <p>
+        Different data sizes and scenarios call for different gradient descent strategies.
+        Test your understanding of when to use batch, stochastic, or mini-batch gradient descent!
+      </p>
+
+      <CoefficientMatchingGame />
 
       <MustKnow
         moduleNumber={5}

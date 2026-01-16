@@ -5,6 +5,7 @@ import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { TrainTestSplitDiagram, BiasVarianceDiagram, OneHotEncodingDiagram } from "@/components/mdx/diagrams";
+import { DataLeakageGame } from "@/components/games";
 
 export default function Module2Content() {
   return (
@@ -234,6 +235,14 @@ encoded_data = ohc.fit_transform(data[['category_column']])
 category_names = ohc.categories_[0]`}</CodeBlock>
 
       <OneHotEncodingDiagram />
+
+      <h2>Practice: Spot the Data Leakage</h2>
+      <p>
+        Data leakage is one of the most common and dangerous mistakes in ML. Test your ability
+        to identify leakage in code snippets. Can you spot when test data is influencing training?
+      </p>
+
+      <DataLeakageGame />
 
       <MustKnow
         moduleNumber={2}

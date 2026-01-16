@@ -5,6 +5,7 @@ import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { KFoldDiagram, PipelineDiagram, GridSearchDiagram } from "@/components/mdx/diagrams";
+import { PipelineBuilderGame } from "@/components/games";
 
 export default function Module3Content() {
   return (
@@ -236,6 +237,15 @@ df_importances = pd.DataFrame(
     list(zip(feature_names, coefficients)),
     columns=['Feature', 'Coefficient']
 ).sort_values('Coefficient', key=abs, ascending=False)`}</CodeBlock>
+
+      <h2>Practice: Build the Pipeline</h2>
+      <p>
+        ML pipelines must be assembled in the correct order. Test your understanding by
+        arranging pipeline steps correctly. Remember: transformers before estimators,
+        and the model is always last!
+      </p>
+
+      <PipelineBuilderGame />
 
       <MustKnow
         moduleNumber={3}
