@@ -3,6 +3,7 @@ export interface Module {
   title: string;
   description: string;
   order: number;
+  readingTime: number; // in minutes
 }
 
 export const modules: Module[] = [
@@ -11,30 +12,35 @@ export const modules: Module[] = [
     title: "Introduction to ML & Linear Regression",
     description: "Foundations of supervised ML, linear regression basics, MSE, and R-squared",
     order: 1,
+    readingTime: 15,
   },
   {
     slug: "module-2",
     title: "Train-Test Split & Polynomial Regression",
     description: "Data splitting, one-hot encoding, overfitting, and polynomial features",
     order: 2,
+    readingTime: 18,
   },
   {
     slug: "module-3",
     title: "Cross-Validation & Hyperparameter Tuning",
     description: "K-fold CV, pipelines, GridSearchCV, and optimal model selection",
     order: 3,
+    readingTime: 20,
   },
   {
     slug: "module-4",
     title: "Bias-Variance Tradeoff & Regularization",
     description: "Ridge, Lasso, Elastic Net, and feature selection techniques",
     order: 4,
+    readingTime: 22,
   },
   {
     slug: "module-5",
     title: "Advanced Regularization Concepts",
     description: "Geometric, analytical, and Bayesian views of regularization",
     order: 5,
+    readingTime: 12,
   },
 ];
 

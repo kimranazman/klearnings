@@ -50,11 +50,16 @@ export function CodeBlock({
         )}
         <button
           onClick={handleCopy}
-          className="p-2 rounded-lg bg-[var(--secondary)] hover:bg-[var(--border)] transition-colors"
+          className="relative p-2 rounded-lg bg-[var(--secondary)] hover:bg-[var(--border)] transition-colors"
           title="Copy code"
         >
           {copied ? (
-            <Check size={16} className="text-[var(--accent)]" />
+            <>
+              <Check size={16} className="text-[var(--accent)]" />
+              <span className="absolute -bottom-8 right-0 px-2 py-1 text-xs bg-[var(--accent)] text-white rounded-md whitespace-nowrap animate-fade-in">
+                Copied!
+              </span>
+            </>
           ) : (
             <Copy size={16} />
           )}

@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle2, Clock } from "lucide-react";
 import { getModuleBySlug, getNextModule, getPrevModule } from "@/lib/modules";
 import { useProgress } from "@/hooks/useProgress";
 import { Quiz } from "@/components/mdx/Quiz";
 import { quizzes } from "@/lib/quiz-data";
+import { TableOfContents } from "@/components/mdx/TableOfContents";
 
 // Module content components
 import Module1Content from "@/content/modules/module-1";
@@ -32,10 +33,20 @@ export default function ModulePage() {
   const prevModule = getPrevModule(slug);
   const { markModuleRead, markModuleCompleted, recordQuizScore, getModuleProgress } = useProgress();
   const [showQuiz, setShowQuiz] = useState(false);
+  const quizRef = useRef<HTMLDivElement>(null);
 
   const moduleProgress = getModuleProgress(slug);
   const ModuleContent = moduleComponents[slug];
   const quizQuestions = quizzes[slug] || [];
+  const hasQuiz = quizQuestions.length > 0;
+
+  const scrollToQuiz = () => {
+    setShowQuiz(true);
+    // Wait for state update then scroll
+    setTimeout(() => {
+      quizRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
 
   useEffect(() => {
     if (slug) {
@@ -67,10 +78,21 @@ export default function ModulePage() {
 
   return (
     <div className="module-content">
+      {/* Table of Contents */}
+      <TableOfContents
+        readingTime={currentModule.readingTime}
+        hasQuiz={hasQuiz}
+        onQuizClick={scrollToQuiz}
+      />
+
       {/* Module Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 text-sm text-[var(--muted)] mb-2">
+        <div className="flex items-center gap-3 text-sm text-[var(--muted)] mb-2 flex-wrap">
           <span>Module {currentModule.order}</span>
+          <span className="flex items-center gap-1">
+            <Clock size={14} />
+            {currentModule.readingTime} min read
+          </span>
           {moduleProgress.completed && (
             <span className="flex items-center gap-1 text-[var(--accent)]">
               <CheckCircle2 size={16} />
@@ -115,7 +137,7 @@ export default function ModulePage() {
 
       {/* Quiz Section */}
       {(showQuiz || moduleProgress.quizScore !== null) && quizQuestions.length > 0 && (
-        <div className="my-8">
+        <div className="my-8" ref={quizRef} id="module-quiz">
           <h2 className="text-2xl font-bold mb-4">Module Quiz</h2>
           {moduleProgress.quizScore !== null && !showQuiz ? (
             <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)]">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Play, RotateCcw, Loader2, Terminal, Copy, Check } from "lucide-react";
+import { Play, RotateCcw, Loader2, Terminal, Copy, Check, Download } from "lucide-react";
 
 interface CodePlaygroundProps {
   initialCode: string;
@@ -20,6 +20,28 @@ interface PyodideInterface {
   loadPackage: (packages: string[]) => Promise<void>;
 }
 
+type LoadingStage = "idle" | "downloading" | "initializing" | "packages" | "sklearn" | "ready" | "error";
+
+const LOADING_MESSAGES: Record<LoadingStage, string> = {
+  idle: "",
+  downloading: "Downloading Python runtime...",
+  initializing: "Initializing Python environment...",
+  packages: "Loading NumPy...",
+  sklearn: "Installing scikit-learn...",
+  ready: "Python environment ready! Click 'Run' to execute code.",
+  error: "Failed to load Python environment. Please refresh the page.",
+};
+
+const LOADING_PROGRESS: Record<LoadingStage, number> = {
+  idle: 0,
+  downloading: 15,
+  initializing: 35,
+  packages: 60,
+  sklearn: 85,
+  ready: 100,
+  error: 0,
+};
+
 export function CodePlayground({
   initialCode,
   title = "Python Playground",
@@ -28,17 +50,19 @@ export function CodePlayground({
   const [code, setCode] = useState(initialCode.trim());
   const [output, setOutput] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isPyodideLoading, setIsPyodideLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState<LoadingStage>("idle");
   const [isPyodideReady, setIsPyodideReady] = useState(false);
   const [copied, setCopied] = useState(false);
   const pyodideRef = useRef<PyodideInterface | null>(null);
+
+  const isPyodideLoading = loadingStage !== "idle" && loadingStage !== "ready" && loadingStage !== "error";
 
   // Load Pyodide
   useEffect(() => {
     const loadPyodide = async () => {
       if (pyodideRef.current) return;
 
-      setIsPyodideLoading(true);
+      setLoadingStage("downloading");
 
       // Load Pyodide script
       const script = document.createElement("script");
@@ -47,27 +71,35 @@ export function CodePlayground({
 
       script.onload = async () => {
         try {
+          setLoadingStage("initializing");
           pyodideRef.current = await window.loadPyodide({
             indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
           });
 
           // Load commonly used packages
+          setLoadingStage("packages");
           await pyodideRef.current.loadPackage(["numpy", "micropip"]);
 
           // Install scikit-learn via micropip
+          setLoadingStage("sklearn");
           await pyodideRef.current.runPythonAsync(`
 import micropip
 await micropip.install('scikit-learn')
           `);
 
+          setLoadingStage("ready");
           setIsPyodideReady(true);
-          setOutput("Python environment ready! Click 'Run' to execute code.");
+          setOutput(LOADING_MESSAGES.ready);
         } catch (error) {
           console.error("Failed to load Pyodide:", error);
-          setOutput("Failed to load Python environment. Please refresh the page.");
-        } finally {
-          setIsPyodideLoading(false);
+          setLoadingStage("error");
+          setOutput(LOADING_MESSAGES.error);
         }
+      };
+
+      script.onerror = () => {
+        setLoadingStage("error");
+        setOutput(LOADING_MESSAGES.error);
       };
 
       document.body.appendChild(script);
@@ -134,14 +166,11 @@ output
         <div className="flex items-center gap-2">
           <Terminal size={18} className="text-[var(--primary)]" />
           <span className="font-medium">{title}</span>
-          {isPyodideLoading && (
-            <span className="text-xs text-[var(--muted)] flex items-center gap-1">
-              <Loader2 size={12} className="animate-spin" />
-              Loading Python...
-            </span>
-          )}
           {isPyodideReady && (
-            <span className="text-xs text-[var(--accent)]">Ready</span>
+            <span className="text-xs text-[var(--accent)] px-2 py-0.5 rounded-full bg-[var(--accent)]/10">Ready</span>
+          )}
+          {loadingStage === "error" && (
+            <span className="text-xs text-red-400 px-2 py-0.5 rounded-full bg-red-400/10">Error</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -181,6 +210,27 @@ output
       {description && (
         <div className="px-4 py-2 text-sm text-[var(--muted)] bg-[var(--secondary)] border-b border-[var(--border)]">
           {description}
+        </div>
+      )}
+
+      {/* Loading Progress Bar */}
+      {isPyodideLoading && (
+        <div className="px-4 py-3 bg-[var(--code-bg)] border-b border-[var(--border)]">
+          <div className="flex items-center gap-3 mb-2">
+            <Download size={16} className="text-[var(--primary)] animate-pulse" />
+            <span className="text-sm text-[var(--muted)]">
+              {LOADING_MESSAGES[loadingStage]}
+            </span>
+          </div>
+          <div className="w-full h-2 bg-[var(--border)] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] transition-all duration-500 ease-out"
+              style={{ width: `${LOADING_PROGRESS[loadingStage]}%` }}
+            />
+          </div>
+          <p className="text-xs text-[var(--muted)] mt-2 opacity-75">
+            First load may take 10-15 seconds to download Python packages
+          </p>
         </div>
       )}
 
