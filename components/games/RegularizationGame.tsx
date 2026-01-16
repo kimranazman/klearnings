@@ -3,12 +3,17 @@
 import { useState, useEffect } from "react";
 import { Play, RotateCcw, Trophy, Sliders, Target } from "lucide-react";
 
+interface RegularizationGameProps {
+  fullScreen?: boolean;
+}
+
 interface Feature {
   name: string;
   trueImportance: number; // 0-10
 }
 
-export function RegularizationGame() {
+export function RegularizationGame({ fullScreen = false }: RegularizationGameProps) {
+  const wrapperClass = fullScreen ? "max-w-4xl mx-auto" : "";
   const [gameState, setGameState] = useState<"intro" | "playing" | "result">("intro");
   const [currentRound, setCurrentRound] = useState(0);
   const [score, setScore] = useState(0);
@@ -109,7 +114,7 @@ export function RegularizationGame() {
 
   if (gameState === "intro") {
     return (
-      <div className="my-8 p-6 rounded-xl border-2 border-cyan-400 dark:border-cyan-600 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30">
+      <div className={`my-8 p-6 rounded-xl border-2 border-cyan-400 dark:border-cyan-600 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 ${wrapperClass}`}>
         <div className="flex items-center gap-3 mb-4">
           <Sliders className="text-cyan-500" size={28} />
           <h3 className="text-xl font-bold">Game: Tune the Regularization!</h3>

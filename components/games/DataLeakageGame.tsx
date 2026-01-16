@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { AlertTriangle, CheckCircle, XCircle, Play, RotateCcw, Trophy, ShieldAlert } from "lucide-react";
 
+interface DataLeakageGameProps {
+  fullScreen?: boolean;
+}
+
 interface Scenario {
   id: number;
   code: string;
@@ -95,7 +99,8 @@ pipe.score(X_test, y_test)`,
   }
 ];
 
-export function DataLeakageGame() {
+export function DataLeakageGame({ fullScreen = false }: DataLeakageGameProps) {
+  const wrapperClass = fullScreen ? "max-w-4xl mx-auto" : "";
   const [gameState, setGameState] = useState<"intro" | "playing" | "result">("intro");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -138,7 +143,7 @@ export function DataLeakageGame() {
 
   if (gameState === "intro") {
     return (
-      <div className="my-8 p-6 rounded-xl border-2 border-amber-400 dark:border-amber-600 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
+      <div className={`my-8 p-6 rounded-xl border-2 border-amber-400 dark:border-amber-600 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 ${wrapperClass}`}>
         <div className="flex items-center gap-3 mb-4">
           <ShieldAlert className="text-amber-500" size={28} />
           <h3 className="text-xl font-bold">Game: Spot the Data Leakage!</h3>

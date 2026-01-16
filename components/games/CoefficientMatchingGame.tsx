@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { Play, RotateCcw, Trophy, Zap, ArrowDown, ArrowRight } from "lucide-react";
 
+interface CoefficientMatchingGameProps {
+  fullScreen?: boolean;
+}
+
 interface GradientScenario {
   id: number;
   dataSize: string;
@@ -91,7 +95,8 @@ const scenarios: GradientScenario[] = [
   },
 ];
 
-export function CoefficientMatchingGame() {
+export function CoefficientMatchingGame({ fullScreen = false }: CoefficientMatchingGameProps) {
+  const wrapperClass = fullScreen ? "max-w-4xl mx-auto" : "";
   const [gameState, setGameState] = useState<"intro" | "playing" | "result">("intro");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -134,7 +139,7 @@ export function CoefficientMatchingGame() {
 
   if (gameState === "intro") {
     return (
-      <div className="my-8 p-6 rounded-xl border-2 border-emerald-400 dark:border-emerald-600 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30">
+      <div className={`my-8 p-6 rounded-xl border-2 border-emerald-400 dark:border-emerald-600 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 ${wrapperClass}`}>
         <div className="flex items-center gap-3 mb-4">
           <Zap className="text-emerald-500" size={28} />
           <h3 className="text-xl font-bold">Game: Choose the Right Gradient Descent!</h3>

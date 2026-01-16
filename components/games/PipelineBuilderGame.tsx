@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { Play, RotateCcw, Trophy, Layers, ArrowRight, GripVertical, Check, X } from "lucide-react";
 
+interface PipelineBuilderGameProps {
+  fullScreen?: boolean;
+}
+
 interface PipelineStep {
   id: string;
   name: string;
@@ -70,7 +74,8 @@ const challenges: Challenge[] = [
   },
 ];
 
-export function PipelineBuilderGame() {
+export function PipelineBuilderGame({ fullScreen = false }: PipelineBuilderGameProps) {
+  const wrapperClass = fullScreen ? "max-w-4xl mx-auto" : "";
   const [gameState, setGameState] = useState<"intro" | "playing" | "result">("intro");
   const [currentChallenge, setCurrentChallenge] = useState(0);
   const [score, setScore] = useState(0);
@@ -135,7 +140,7 @@ export function PipelineBuilderGame() {
 
   if (gameState === "intro") {
     return (
-      <div className="my-8 p-6 rounded-xl border-2 border-purple-400 dark:border-purple-600 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30">
+      <div className={`my-8 p-6 rounded-xl border-2 border-purple-400 dark:border-purple-600 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 ${wrapperClass}`}>
         <div className="flex items-center gap-3 mb-4">
           <Layers className="text-purple-500" size={28} />
           <h3 className="text-xl font-bold">Game: Build the Pipeline!</h3>

@@ -8,7 +8,11 @@ interface DataPoint {
   y: number;
 }
 
-export function PredictionGame() {
+interface PredictionGameProps {
+  fullScreen?: boolean;
+}
+
+export function PredictionGame({ fullScreen = false }: PredictionGameProps) {
   const [gameState, setGameState] = useState<"intro" | "playing" | "result">("intro");
   const [currentRound, setCurrentRound] = useState(0);
   const [score, setScore] = useState(0);
@@ -170,7 +174,7 @@ export function PredictionGame() {
 
       {/* Chart */}
       <div className="bg-[var(--secondary)] rounded-lg p-4 mb-4">
-        <svg viewBox="0 0 400 250" className="w-full h-64">
+        <svg viewBox="0 0 400 250" className={`w-full ${fullScreen ? "h-80 md:h-96" : "h-64"}`}>
           {/* Grid */}
           <defs>
             <pattern id="game-grid" width="30" height="20" patternUnits="userSpaceOnUse">
