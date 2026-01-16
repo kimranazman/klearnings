@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { MustKnow } from "@/components/mdx/MustKnow";
 import { TrainTestSplitDiagram, BiasVarianceDiagram, OneHotEncodingDiagram } from "@/components/mdx/diagrams";
 
 export default function Module2Content() {
@@ -233,6 +234,42 @@ encoded_data = ohc.fit_transform(data[['category_column']])
 category_names = ohc.categories_[0]`}</CodeBlock>
 
       <OneHotEncodingDiagram />
+
+      <MustKnow
+        moduleNumber={2}
+        title="Absolute Must-Know: Train-Test Split & Data Leakage"
+        tldr="ALWAYS split data BEFORE any processing. fit_transform() on train, transform() on test. Never let test data influence training—that's cheating."
+        items={[
+          {
+            concept: "Train-Test Split is NON-NEGOTIABLE",
+            whyItMatters: "Testing on training data gives fake high scores. Your model memorized answers instead of learning patterns. It will FAIL on new data.",
+            analogy: "It's like grading a student using the exact questions they studied. Of course they score 100%—but give them a new exam and they fail.",
+            codeSnippet: "X_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.3, random_state=42)"
+          },
+          {
+            concept: "Data Leakage = Cheating (and You Will Get Caught)",
+            whyItMatters: "Any information from test data that 'leaks' into training makes your metrics meaningless. In production, you won't have future data.",
+            analogy: "It's insider trading. If you know tomorrow's news today, of course you can 'predict' stock prices—but that's not a real skill."
+          },
+          {
+            concept: "fit_transform() vs transform() - The Critical Difference",
+            whyItMatters: "fit_transform() learns parameters (mean, std) from data. Using it on test data leaks information. Test data must use parameters learned from training.",
+            analogy: "fit_transform() = learn the grading rubric AND grade papers. transform() = grade papers using an already-learned rubric.",
+            codeSnippet: "scaler.fit_transform(X_train)  # Learn + apply\nscaler.transform(X_test)        # Apply only!"
+          },
+          {
+            concept: "Overfitting vs Underfitting - The Goldilocks Problem",
+            whyItMatters: "Overfitting: training error low, test error high (memorized noise). Underfitting: both errors high (too simple). You want the sweet spot.",
+            analogy: "Underfitting = 'All products sell the same.' Overfitting = 'Product #4523 sells exactly 847 units on Tuesdays in March.' Just right = 'Products with good reviews sell better.'"
+          },
+          {
+            concept: "Polynomial Features Make Lines into Curves",
+            whyItMatters: "Real relationships aren't always linear. x² lets you model curves (diminishing returns, saturation effects) while still using linear regression.",
+            analogy: "A straight line can't capture 'more ads = more sales, but with diminishing returns.' Adding ad_spend² captures the curve.",
+            codeSnippet: "poly = PolynomialFeatures(degree=2)\nX_poly = poly.fit_transform(X)"
+          }
+        ]}
+      />
 
       <h2>Key Takeaways</h2>
 

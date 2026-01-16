@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { MustKnow } from "@/components/mdx/MustKnow";
 import { KFoldDiagram, PipelineDiagram, GridSearchDiagram } from "@/components/mdx/diagrams";
 
 export default function Module3Content() {
@@ -235,6 +236,42 @@ df_importances = pd.DataFrame(
     list(zip(feature_names, coefficients)),
     columns=['Feature', 'Coefficient']
 ).sort_values('Coefficient', key=abs, ascending=False)`}</CodeBlock>
+
+      <MustKnow
+        moduleNumber={3}
+        title="Absolute Must-Know: Cross-Validation & Pipelines"
+        tldr="Use K-fold CV for reliable scores (not lucky splits). Pipelines prevent leakage. GridSearchCV finds optimal hyperparameters automatically."
+        items={[
+          {
+            concept: "K-Fold Cross-Validation = Multiple Test Runs for Confidence",
+            whyItMatters: "A single train-test split can be lucky or unlucky. K-fold tests on K different splits and averages results. Your reported score is now reliable.",
+            analogy: "One job interview might go great or terrible due to random factors. Five interviews with different managers? That average score actually means something.",
+            codeSnippet: "scores = cross_val_score(model, X, y, cv=5)\nprint(f'R² = {scores.mean():.2f} ± {scores.std():.2f}')"
+          },
+          {
+            concept: "Pipeline = Assembly Line That Prevents Mistakes",
+            whyItMatters: "Pipelines chain preprocessing + model together. They guarantee test data goes through the exact same transformations as training data. No manual errors.",
+            analogy: "An assembly line ensures every car gets engine, then paint, then inspection—in that order. A pipeline ensures every data point gets scaled, then polynomials, then model.",
+            codeSnippet: "pipe = Pipeline([\n    ('poly', PolynomialFeatures()),\n    ('scale', StandardScaler()),\n    ('model', Ridge())\n])"
+          },
+          {
+            concept: "GridSearchCV = Systematic Recipe Testing",
+            whyItMatters: "Don't guess hyperparameters! GridSearchCV tests all combinations with CV, finds the best, and automatically refits on all data. Production-ready.",
+            analogy: "Testing 3 salt levels × 3 temperatures × 3 cook times = 27 recipes. GridSearchCV tests all 27, picks the winner, and gives you the final recipe.",
+            codeSnippet: "grid = GridSearchCV(pipe, param_grid, cv=5)\ngrid.fit(X, y)\nprint(grid.best_params_)"
+          },
+          {
+            concept: "Hyperparameters vs Parameters - You Choose vs Model Learns",
+            whyItMatters: "Parameters (coefficients) are learned by fit(). Hyperparameters (alpha, degree) are chosen by YOU before training. Wrong choices = bad model.",
+            analogy: "Parameters = the answers on the exam (model figures out). Hyperparameters = which textbook to study from (you decide)."
+          },
+          {
+            concept: "Pipeline Naming: step__parameter for GridSearchCV",
+            whyItMatters: "To tune hyperparameters inside a pipeline, use double underscore: 'stepname__parametername'. This is how GridSearchCV accesses nested parameters.",
+            codeSnippet: "param_grid = {\n    'poly__degree': [1, 2, 3],\n    'model__alpha': [0.01, 0.1, 1.0]\n}"
+          }
+        ]}
+      />
 
       <h2>Key Takeaways</h2>
 

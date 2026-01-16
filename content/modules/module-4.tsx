@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { MustKnow } from "@/components/mdx/MustKnow";
 import { BiasVarianceTargetDiagram, RidgeLassoDiagram, RFEDiagram } from "@/components/mdx/diagrams";
 
 export default function Module4Content() {
@@ -233,6 +234,43 @@ rfe.fit(X_train_scaled, y_train)
 rfecv = RFECV(estimator, cv=5)
 rfecv.fit(X_train_scaled, y_train)
 print(f"Optimal features: {rfecv.n_features_}")`}</CodeBlock>
+
+      <MustKnow
+        moduleNumber={4}
+        title="Absolute Must-Know: Regularization & Feature Selection"
+        tldr="Regularization adds a penalty to prevent overfitting. Lasso (L1) eliminates features (coef=0). Ridge (L2) shrinks all. Always scale first!"
+        items={[
+          {
+            concept: "Bias-Variance Tradeoff - The Fundamental ML Dilemma",
+            whyItMatters: "High bias = model too simple (misses patterns). High variance = model too complex (memorizes noise). Regularization lets you control this balance.",
+            analogy: "Underfitting: 'Everything costs $50.' Overfitting: 'Item #4523 costs exactly $47.23 on rainy Tuesdays.' You want: 'Premium items cost more.'"
+          },
+          {
+            concept: "Ridge (L2) = Everyone Takes a Pay Cut",
+            whyItMatters: "Ridge shrinks ALL coefficients toward zero but never exactly to zero. Use when you believe all features contribute something.",
+            analogy: "Budget cuts: 'Everyone takes a 20% pay cut.' All employees stay, but salaries shrink. No one gets fired.",
+            codeSnippet: "Cost = MSE + λ × Σ(coefficients²)"
+          },
+          {
+            concept: "Lasso (L1) = Fire the Underperformers",
+            whyItMatters: "Lasso sets weak coefficients EXACTLY to zero, eliminating features automatically. Use for feature selection when you have many potentially useless features.",
+            analogy: "Budget cuts: 'Lay off the bottom performers.' Some employees get completely eliminated (coef=0), others keep their salary.",
+            codeSnippet: "Cost = MSE + λ × Σ|coefficients|\n# Some coefficients become exactly 0!"
+          },
+          {
+            concept: "Alpha (λ) Controls Regularization Strength",
+            whyItMatters: "Low alpha = weak penalty, complex model, risk overfitting. High alpha = strong penalty, simple model, risk underfitting. Use LassoCV/RidgeCV to find optimal.",
+            analogy: "Alpha is how tight the budget is. α=0.001 = loose budget, keep everything. α=100 = brutal cuts, only essentials survive.",
+            codeSnippet: "lasso_cv = LassoCV(cv=5)  # Auto-finds best alpha"
+          },
+          {
+            concept: "MUST Scale Features Before Regularization",
+            whyItMatters: "Regularization penalizes large coefficients. If 'price' is in millions and 'rating' is 1-5, the penalty unfairly punishes rating. Scaling makes it fair.",
+            analogy: "It's like penalizing 'salary in yen' vs 'salary in dollars.' Without converting to same scale, comparison is meaningless.",
+            codeSnippet: "scaler = StandardScaler()\nX_scaled = scaler.fit_transform(X_train)"
+          }
+        ]}
+      />
 
       <h2>Key Takeaways</h2>
 

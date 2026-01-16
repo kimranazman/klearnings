@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { MustKnow } from "@/components/mdx/MustKnow";
 import { ConstraintRegionsDiagram, PriorDistributionsDiagram, FeatureScalingDiagram, AlphaEffectDiagram } from "@/components/mdx/diagrams";
 
 export default function Module5Content() {
@@ -278,6 +279,41 @@ print(f"R2 Score: {r2:.4f}")`}</CodeBlock>
           </tbody>
         </table>
       </div>
+
+      <MustKnow
+        moduleNumber={5}
+        title="Absolute Must-Know: Deep Dive into Regularization"
+        tldr="Three views of regularization: analytical (smaller coefs = simpler), geometric (circle vs diamond), probabilistic (priors on coefficients). StandardScaler is mandatory."
+        items={[
+          {
+            concept: "Geometric View: Circle (Ridge) vs Diamond (Lasso)",
+            whyItMatters: "Lasso's diamond has sharp corners on the axes. Cost function contours are more likely to hit corners = coefficients become exactly zero. Ridge's circle has no corners = no exact zeros.",
+            analogy: "Imagine rolling a ball into a room. In a circular room (Ridge), it can stop anywhere along the wall. In a diamond room (Lasso), it naturally slides into corners."
+          },
+          {
+            concept: "Probabilistic View: Regularization = Prior Beliefs",
+            whyItMatters: "Regularization is like saying 'I believe most coefficients should be small/zero.' Data can override this belief, but only with strong evidence.",
+            analogy: "Ridge = mild skeptic: 'Probably small.' Lasso = strong skeptic: 'Probably zero, prove me wrong.'",
+            codeSnippet: "# Ridge assumes Gaussian prior (bell curve)\n# Lasso assumes Laplacian prior (sharp peak at 0)"
+          },
+          {
+            concept: "StandardScaler: z = (x - mean) / std",
+            whyItMatters: "After scaling, all features have mean=0 and std=1. Now a coefficient of 2.0 means '2 standard deviations of X → 2.0 units of y' regardless of original scale.",
+            analogy: "Converting all currencies to USD before comparing prices. Now $100 actually means the same thing everywhere.",
+            codeSnippet: "scaler = StandardScaler()\nX_train_scaled = scaler.fit_transform(X_train)\nX_test_scaled = scaler.transform(X_test)  # Same params!"
+          },
+          {
+            concept: "Interpreting Scaled Coefficients",
+            whyItMatters: "After standardization, larger |coefficient| = more important feature. A coef of 0.8 vs 0.2 means the first feature has 4x the impact per standard deviation.",
+            analogy: "It's like asking 'How much does each ingredient affect the taste?' Now you can compare salt to sugar fairly."
+          },
+          {
+            concept: "The Complete ML Regression Pipeline",
+            whyItMatters: "This is the production-ready workflow. Memorize this pattern—it applies to almost every ML project.",
+            codeSnippet: "# 1. Split data\nX_train, X_test, y_train, y_test = train_test_split(...)\n\n# 2. Build pipeline\npipe = Pipeline([('poly', PolynomialFeatures()),\n                 ('scale', StandardScaler()),\n                 ('model', LassoCV(cv=5))])\n\n# 3. Fit and evaluate\npipe.fit(X_train, y_train)\nprint(f'R² = {pipe.score(X_test, y_test):.3f}')"
+          }
+        ]}
+      />
 
       <h2>Key Takeaways</h2>
 

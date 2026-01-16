@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { MustKnow } from "@/components/mdx/MustKnow";
 import { SupervisedLearningDiagram } from "@/components/mdx/diagrams";
 
 export default function Module1Content() {
@@ -252,6 +253,43 @@ X_scaled = scaler.transform(X_train)
 
 # Combined fit_transform (for training data only)
 X_train_scaled = scaler.fit_transform(X_train)`}</CodeBlock>
+
+      <MustKnow
+        moduleNumber={1}
+        title="Absolute Must-Know: Linear Regression Foundations"
+        tldr="Supervised learning needs labeled data (X, y pairs). Use MSE to measure errors and R² to measure explained variance. Linear regression finds the best-fit line: y = β₀ + β₁x"
+        items={[
+          {
+            concept: "Supervised Learning = Learning from Examples with Answers",
+            whyItMatters: "You CANNOT train a model without historical data that includes both inputs AND outcomes. No labels = no supervised learning.",
+            analogy: "It's like studying for an exam with a textbook that has answers in the back. Without answers, you can't check if you're learning correctly.",
+            codeSnippet: "model.fit(X_train, y_train)  # X=features, y=answers"
+          },
+          {
+            concept: "Regression = Predicting Numbers, Classification = Predicting Categories",
+            whyItMatters: "Using the wrong type leads to meaningless results. You can't use classification for 'predict sales in dollars' or regression for 'spam or not spam'.",
+            analogy: "Regression: 'How much will it cost?' → $47.50. Classification: 'Will they buy?' → Yes/No. Different questions, different tools."
+          },
+          {
+            concept: "MSE (Mean Squared Error) - Your Prediction Penalty Score",
+            whyItMatters: "MSE tells you how wrong your predictions are on average. Lower = better. It squares errors so big mistakes hurt MORE than small ones.",
+            analogy: "Missing a sales forecast by $50K is not just 5x worse than $10K—it's 25x worse in MSE terms. Big mistakes are catastrophic.",
+            codeSnippet: "MSE = (1/n) * Σ(predicted - actual)²"
+          },
+          {
+            concept: "R² (R-Squared) - How Much Your Model Explains",
+            whyItMatters: "R²=0.85 means your model explains 85% of the variation. The remaining 15% is noise or factors you didn't include.",
+            analogy: "If R²=0.85, you've captured 85% of why sales go up or down. The other 15%? Random tweets, weather, cosmic rays—things you can't predict.",
+            codeSnippet: "R² ranges from 0 (useless) to 1 (perfect)"
+          },
+          {
+            concept: "The sklearn Pattern: fit() then predict()",
+            whyItMatters: "Every sklearn model follows this pattern. Master it once, use it everywhere—Linear Regression, Random Forest, Neural Networks, all the same.",
+            analogy: "fit() = studying for the exam. predict() = taking the exam. You must study first!",
+            codeSnippet: "model.fit(X_train, y_train)\npredictions = model.predict(X_test)"
+          }
+        ]}
+      />
 
       <h2>Key Takeaways</h2>
 
