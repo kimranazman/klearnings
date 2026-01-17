@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Code2, Trophy, ChevronRight, Moon, Sun, Sparkles, ArrowRight, Play, Gamepad2, BookMarked } from "lucide-react";
+import { BookOpen, Code2, ChevronRight, Moon, Sun, Sparkles, ArrowRight, Play, Gamepad2, BookMarked, BookText } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { modules } from "@/lib/modules";
@@ -23,6 +23,12 @@ export default function Home() {
       color: "from-violet-500 to-indigo-500",
     },
     {
+      icon: BookText,
+      title: "Story-Based Learning",
+      description: "Learn through engaging narratives—80% story, 20% lesson for maximum retention",
+      color: "from-emerald-500 to-teal-500",
+    },
+    {
       icon: Code2,
       title: "Interactive Python Playground",
       description: "Run real Python code directly in your browser with NumPy and scikit-learn",
@@ -33,12 +39,6 @@ export default function Home() {
       title: "Interactive Games",
       description: "Practice concepts with fun mini-games in each module",
       color: "from-pink-500 to-rose-500",
-    },
-    {
-      icon: Trophy,
-      title: "Progress Tracking",
-      description: "Track your learning progress and pick up where you left off",
-      color: "from-amber-500 to-orange-500",
     },
   ];
 
@@ -86,6 +86,13 @@ export default function Home() {
             </Link>
 
             <div className="flex items-center gap-3">
+              <Link
+                href="/stories"
+                className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-[var(--muted)] hover:text-foreground hover:bg-[var(--secondary)] transition-colors"
+              >
+                <BookText size={18} />
+                <span>Stories</span>
+              </Link>
               <Link
                 href="/games"
                 className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-[var(--muted)] hover:text-foreground hover:bg-[var(--secondary)] transition-colors"
@@ -193,7 +200,7 @@ export default function Home() {
             >
               {[
                 { value: "5", label: "Modules" },
-                { value: "25+", label: "Quizzes" },
+                { value: "6", label: "Stories" },
                 { value: "5", label: "Games" },
               ].map((stat, i) => (
                 <div key={i} className="text-center">

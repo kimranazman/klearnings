@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun, Menu, X, Sparkles, Gamepad2, BookOpen } from "lucide-react";
+import { Moon, Sun, Menu, X, Sparkles, Gamepad2, BookOpen, BookText } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -90,6 +90,15 @@ export function Header({ onMenuToggle, isMenuOpen }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Stories link - desktop only */}
+          <Link
+            href="/stories"
+            className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-[var(--muted)] hover:text-foreground hover:bg-[var(--secondary)] transition-colors"
+          >
+            <BookText size={18} />
+            <span>Stories</span>
+          </Link>
+
           {/* Games link - desktop only */}
           <Link
             href="/games"
