@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { Formula } from "@/components/mdx/Formula";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { TrainTestSplitDiagram, BiasVarianceDiagram, OneHotEncodingDiagram } from "@/components/mdx/diagrams";
 import { DataLeakageGame } from "@/components/games";
@@ -151,13 +152,16 @@ export default function Module2Content() {
       <h2>Core Formulas</h2>
 
       <h3>Polynomial Regression (Degree 2)</h3>
-      <CodeBlock language="text">{`y = β₀ + β₁x + β₂x²`}</CodeBlock>
+      <Formula block>{"y = \\beta_0 + \\beta_1 x + \\beta_2 x^2"}</Formula>
 
-      <h3>Standard Scaler</h3>
-      <CodeBlock language="text">{`z = (x - mean) / standard_deviation`}</CodeBlock>
+      <h3>Standard Scaler (Z-score Normalization)</h3>
+      <Formula block>{"z = \\frac{x - \\mu}{\\sigma}"}</Formula>
+      <p className="text-sm text-[var(--muted)] mt-2">
+        Where: <strong>μ</strong> = mean, <strong>σ</strong> = standard deviation
+      </p>
 
       <h3>MinMax Scaler</h3>
-      <CodeBlock language="text">{`x_scaled = (x - x_min) / (x_max - x_min)`}</CodeBlock>
+      <Formula block>{"x_{\\text{scaled}} = \\frac{x - x_{\\text{min}}}{x_{\\text{max}} - x_{\\text{min}}}"}</Formula>
 
       <h2>Train-Test Split Process</h2>
 

@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { Formula } from "@/components/mdx/Formula";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { BiasVarianceTargetDiagram, RidgeLassoDiagram, RFEDiagram } from "@/components/mdx/diagrams";
 import { RegularizationGame } from "@/components/games";
@@ -88,30 +89,22 @@ export default function Module4Content() {
       <h2>Core Formulas</h2>
 
       <h3>Ridge Regression (L2 Regularization)</h3>
-      <CodeBlock language="text">{`Cost = RSS + λ * Σ(wⱼ²)
-     = Σ(y - Xw)² + λ * ||w||₂²
-
-Where:
-- λ (alpha): regularization strength parameter
-- wⱼ: coefficient for feature j
-- ||w||₂²: L2 norm (sum of squared coefficients)`}</CodeBlock>
+      <Formula block>{"\\text{Cost} = \\sum_{i=1}^{m}(y_i - \\hat{y}_i)^2 + \\lambda \\sum_{j=1}^{n} w_j^2"}</Formula>
+      <p className="text-sm text-[var(--muted)] mt-2">
+        Where: <strong>λ</strong> = regularization strength, <strong>wⱼ</strong> = coefficient for feature j. The L2 penalty shrinks all coefficients toward zero.
+      </p>
 
       <h3>Lasso Regression (L1 Regularization)</h3>
-      <CodeBlock language="text">{`Cost = RSS + λ * Σ|wⱼ|
-     = Σ(y - Xw)² + λ * ||w||₁
-
-Where:
-- ||w||₁: L1 norm (sum of absolute values of coefficients)`}</CodeBlock>
+      <Formula block>{"\\text{Cost} = \\sum_{i=1}^{m}(y_i - \\hat{y}_i)^2 + \\lambda \\sum_{j=1}^{n} |w_j|"}</Formula>
+      <p className="text-sm text-[var(--muted)] mt-2">
+        The L1 penalty can set coefficients exactly to zero, enabling automatic feature selection.
+      </p>
 
       <h3>Elastic Net (Combined L1 + L2)</h3>
-      <CodeBlock language="text">{`Cost = RSS + λ₁ * Σ|wⱼ| + λ₂ * Σ(wⱼ²)
-     = RSS + λ * [α * ||w||₁ + (1-α) * ||w||₂²]
-
-Where:
-- α (l1_ratio): balance between L1 and L2
-  - α = 1: Pure Lasso
-  - α = 0: Pure Ridge
-  - 0 < α < 1: Mix of both`}</CodeBlock>
+      <Formula block>{"\\text{Cost} = \\text{RSS} + \\lambda \\left[ \\alpha \\sum_{j=1}^{n}|w_j| + (1-\\alpha) \\sum_{j=1}^{n}w_j^2 \\right]"}</Formula>
+      <p className="text-sm text-[var(--muted)] mt-2">
+        Where: <strong>α</strong> (l1_ratio) controls the balance — α=1 is pure Lasso, α=0 is pure Ridge, 0&lt;α&lt;1 is a mix of both.
+      </p>
 
       <h2>Bias-Variance Target Analogy</h2>
 

@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { Formula } from "@/components/mdx/Formula";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { SupervisedLearningDiagram } from "@/components/mdx/diagrams";
 import { PredictionGame } from "@/components/games";
@@ -166,27 +167,22 @@ export default function Module1Content() {
       <h2>Core Formulas</h2>
 
       <h3>Linear Regression Model</h3>
-      <CodeBlock language="text">{`y_pred = β₀ + β₁ * x
-
-Where:
-- β₀ = intercept (y value when x = 0)
-- β₁ = slope (change in y for each unit increase in x)
-- x = input feature`}</CodeBlock>
+      <Formula block>{"\\hat{y} = \\beta_0 + \\beta_1 x"}</Formula>
+      <p className="text-sm text-[var(--muted)] mt-2">
+        Where: <strong>β₀</strong> = intercept (y value when x = 0), <strong>β₁</strong> = slope (change in y for each unit increase in x), <strong>x</strong> = input feature
+      </p>
 
       <h3>Mean Squared Error (MSE)</h3>
-      <CodeBlock language="text">{`MSE = (1/m) * Σ(ŷᵢ - yᵢ)²    for i = 1 to m
-
-Where:
-- m = number of observations
-- Note: Often written as 1/(2m) for calculus convenience`}</CodeBlock>
+      <Formula block>{"\\text{MSE} = \\frac{1}{m} \\sum_{i=1}^{m} (\\hat{y}_i - y_i)^2"}</Formula>
+      <p className="text-sm text-[var(--muted)] mt-2">
+        Where: <strong>m</strong> = number of observations. Note: Often written as 1/(2m) for calculus convenience.
+      </p>
 
       <h3>R-squared</h3>
-      <CodeBlock language="text">{`R² = 1 - (SSE / SST)
-
-Where:
-- SSE = Sum of Squared Errors = Σ(yᵢ - ŷᵢ)²
-- SST = Total Sum of Squares = Σ(yᵢ - ȳ)²
-- R² = explained variation ratio`}</CodeBlock>
+      <Formula block>{"R^2 = 1 - \\frac{\\text{SSE}}{\\text{SST}} = 1 - \\frac{\\sum_{i=1}^{m}(y_i - \\hat{y}_i)^2}{\\sum_{i=1}^{m}(y_i - \\bar{y})^2}"}</Formula>
+      <p className="text-sm text-[var(--muted)] mt-2">
+        Where: <strong>SSE</strong> = Sum of Squared Errors, <strong>SST</strong> = Total Sum of Squares, <strong>ȳ</strong> = mean of y values
+      </p>
 
       <h2>Supervised Learning Workflow</h2>
 
