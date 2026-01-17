@@ -9,6 +9,7 @@ import { useProgress } from "@/hooks/useProgress";
 import { Quiz } from "@/components/mdx/Quiz";
 import { quizzes } from "@/lib/quiz-data";
 import { TableOfContents } from "@/components/mdx/TableOfContents";
+import { GlossaryHighlighter } from "@/components/ui/GlossaryHighlighter";
 
 // Module content components
 import Module1Content from "@/content/modules/module-1";
@@ -105,7 +106,9 @@ export default function ModulePage() {
       </div>
 
       {/* Module Content */}
-      <ModuleContent />
+      <GlossaryHighlighter>
+        <ModuleContent />
+      </GlossaryHighlighter>
 
       {/* Mark Complete Button */}
       {!moduleProgress.completed && (

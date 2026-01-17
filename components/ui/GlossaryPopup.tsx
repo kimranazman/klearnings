@@ -17,6 +17,17 @@ export function GlossaryPopup() {
   const [isVisible, setIsVisible] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
 
+  const showPopup = useCallback((foundTerm: GlossaryTerm, x: number, y: number) => {
+    setTerm(foundTerm);
+    setPosition({ x, y });
+    setIsVisible(true);
+  }, []);
+
+  const hidePopup = useCallback(() => {
+    setIsVisible(false);
+  }, []);
+
+  // Handle text selection
   const handleSelection = useCallback(() => {
     const selection = window.getSelection();
     const text = selection?.toString().trim() || "";
@@ -25,7 +36,6 @@ export function GlossaryPopup() {
       return;
     }
 
-    // Check if selection is within a glossary term
     const foundTerm = findGlossaryTerm(text);
 
     if (foundTerm) {
@@ -33,16 +43,32 @@ export function GlossaryPopup() {
       const rect = range?.getBoundingClientRect();
 
       if (rect) {
-        // Position popup above the selection
         const x = rect.left + rect.width / 2;
         const y = rect.top - 10;
-
-        setTerm(foundTerm);
-        setPosition({ x, y });
-        setIsVisible(true);
+        showPopup(foundTerm, x, y);
       }
     }
-  }, []);
+  }, [showPopup]);
+
+  // Handle click on glossary-term elements
+  const handleTermClick = useCallback((e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+
+    if (target.classList.contains('glossary-term')) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const termText = target.textContent || '';
+      const foundTerm = findGlossaryTerm(termText);
+
+      if (foundTerm) {
+        const rect = target.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top - 10;
+        showPopup(foundTerm, x, y);
+      }
+    }
+  }, [showPopup]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     // Cmd/Ctrl + D to look up selected text
@@ -53,34 +79,43 @@ export function GlossaryPopup() {
 
     // Escape to close
     if (e.key === "Escape") {
-      setIsVisible(false);
+      hidePopup();
     }
-  }, [handleSelection]);
+  }, [handleSelection, hidePopup]);
 
   const handleClickOutside = useCallback((e: MouseEvent) => {
-    if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
-      setIsVisible(false);
+    const target = e.target as HTMLElement;
+
+    // Don't close if clicking on a glossary term (we want to show popup instead)
+    if (target.classList.contains('glossary-term')) {
+      return;
     }
-  }, []);
+
+    if (popupRef.current && !popupRef.current.contains(target)) {
+      hidePopup();
+    }
+  }, [hidePopup]);
 
   useEffect(() => {
     document.addEventListener("mouseup", handleSelection);
     document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("click", handleTermClick, true);
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
       document.removeEventListener("mouseup", handleSelection);
       document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("click", handleTermClick, true);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [handleSelection, handleKeyDown, handleClickOutside]);
+  }, [handleSelection, handleKeyDown, handleTermClick, handleClickOutside]);
 
   // Adjust position if popup would go off-screen
   const getAdjustedPosition = () => {
     if (!position) return { top: 0, left: 0 };
 
     const popupWidth = 320;
-    const popupHeight = 200;
+    const popupHeight = 220;
     const padding = 16;
 
     let left = position.x - popupWidth / 2;
@@ -126,7 +161,7 @@ export function GlossaryPopup() {
               <span className="font-semibold text-sm">{term.term}</span>
             </div>
             <button
-              onClick={() => setIsVisible(false)}
+              onClick={hidePopup}
               className="text-white/80 hover:text-white transition-colors"
             >
               <X size={16} />
@@ -172,7 +207,7 @@ export function GlossaryPopup() {
               </div>
               <Link
                 href="/glossary"
-                onClick={() => setIsVisible(false)}
+                onClick={hidePopup}
                 className="flex items-center gap-1 text-xs text-[var(--primary)] hover:underline"
               >
                 View all terms
