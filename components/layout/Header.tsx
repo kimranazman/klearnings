@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun, Menu, X, Sparkles, Gamepad2 } from "lucide-react";
+import { Moon, Sun, Menu, X, Sparkles, Gamepad2, BookOpen } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -97,6 +97,15 @@ export function Header({ onMenuToggle, isMenuOpen }: HeaderProps) {
           >
             <Gamepad2 size={18} />
             <span>Games</span>
+          </Link>
+
+          {/* Glossary link - desktop only */}
+          <Link
+            href="/glossary"
+            className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-[var(--muted)] hover:text-foreground hover:bg-[var(--secondary)] transition-colors"
+          >
+            <BookOpen size={18} />
+            <span>Glossary</span>
           </Link>
 
           {/* Get Started button - desktop only */}
