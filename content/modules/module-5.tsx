@@ -1,12 +1,13 @@
 "use client";
 
 import { CodePlayground } from "@/components/code/CodePlayground";
+import { InteractiveCode } from "@/components/code/InteractiveCode";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
-import { CodeComparison } from "@/components/mdx/CodeComparison";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { ConstraintRegionsDiagram, PriorDistributionsDiagram, FeatureScalingDiagram, AlphaEffectDiagram } from "@/components/mdx/diagrams";
 import { CoefficientMatchingGame } from "@/components/games";
+import { module5Exercises } from "@/lib/code-exercise-data";
 
 export default function Module5Content() {
   return (
@@ -246,7 +247,7 @@ print(f"R2 Score: {r2:.4f}")`}</CodeBlock>
         Without standardization, coefficient magnitudes are meaningless for comparison.
         A coefficient of 0.001 might be more important than one of 100!
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Interpreting unscaled coefficients
 # Features: price ($10-$500), rating (1-5)
 model = Lasso(alpha=0.1)
@@ -270,13 +271,14 @@ print("Price is slightly more important than rating")
 # Correct interpretation`}
         wrongExplanation="Unscaled coefficients depend on feature units. Price in dollars vs rating in stars aren't comparable."
         rightExplanation="After scaling, both features have std=1. Coefficients now represent impact per standard deviation."
+        exercise={module5Exercises[0]}
       />
 
       <h3>Mistake #2: Forgetting max_iter for Lasso</h3>
       <p>
         Lasso uses iterative optimization. With default iterations, it may not converge on complex data.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Default max_iter might not converge
 lasso = Lasso(alpha=0.01)
 lasso.fit(X_train_scaled, y_train)
@@ -301,7 +303,7 @@ lasso_cv.fit(X_train_scaled, y_train)`}
       <p>
         In production, you need to apply the exact same preprocessing. Manual steps are error-prone.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Manual steps for production
 # Training
 scaler = StandardScaler()

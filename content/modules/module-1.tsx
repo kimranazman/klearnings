@@ -1,13 +1,14 @@
 "use client";
 
 import { CodePlayground } from "@/components/code/CodePlayground";
+import { InteractiveCode } from "@/components/code/InteractiveCode";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
-import { CodeComparison } from "@/components/mdx/CodeComparison";
 import { Formula } from "@/components/mdx/Formula";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { SupervisedLearningDiagram } from "@/components/mdx/diagrams";
 import { PredictionGame } from "@/components/games";
+import { module1Exercises } from "@/lib/code-exercise-data";
 
 export default function Module1Content() {
   return (
@@ -263,7 +264,7 @@ X_train_scaled = scaler.fit_transform(X_train)`}</CodeBlock>
         This is like studying the exact exam questions, then claiming you &quot;learned&quot; the material
         when you ace the test. Your model will look great but fail on new data.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Testing on the same data you trained on
 model = LinearRegression()
 model.fit(X, y)  # Train on ALL data
@@ -280,6 +281,7 @@ predictions = model.predict(X_test)  # Test on 30%
 r2 = r2_score(y_test, predictions)  # Honest score`}
         wrongExplanation="Model memorizes training data, giving falsely optimistic metrics that won't hold up in production."
         rightExplanation="Model is evaluated on data it has never seen, giving realistic performance estimates."
+        exercise={module1Exercises[0]}
       />
 
       <h3>Mistake #2: Forgetting to Fit Before Predict</h3>
@@ -287,7 +289,7 @@ r2 = r2_score(y_test, predictions)  # Honest score`}
         The model needs to &quot;learn&quot; from training data before it can make predictions.
         Skipping fit() is like taking an exam without studying.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Predicting without fitting first
 model = LinearRegression()
 predictions = model.predict(X_test)  # Error!
@@ -299,13 +301,14 @@ model.fit(X_train, y_train)  # Learn first
 predictions = model.predict(X_test)  # Then predict`}
         wrongExplanation="The model has no learned parameters yet. It doesn't know what coefficients to use."
         rightExplanation="fit() learns the coefficients from training data, then predict() uses them."
+        exercise={module1Exercises[1]}
       />
 
       <h3>Mistake #3: Using Wrong Metric for the Problem</h3>
       <p>
         Using classification metrics for regression (or vice versa) gives meaningless results.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Using accuracy for regression
 from sklearn.metrics import accuracy_score
 model.fit(X_train, y_train)
@@ -320,6 +323,7 @@ r2 = r2_score(y_test, predictions)
 mse = mean_squared_error(y_test, predictions)`}
         wrongExplanation="Accuracy is for classification (categories). It makes no sense for continuous predictions like $47.52."
         rightExplanation="R² and MSE are designed for regression. They measure how close your numbers are to the actual values."
+        exercise={module1Exercises[2]}
       />
 
       <h2>Practice: Guess the Regression Line</h2>

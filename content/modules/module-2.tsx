@@ -1,13 +1,14 @@
 "use client";
 
 import { CodePlayground } from "@/components/code/CodePlayground";
+import { InteractiveCode } from "@/components/code/InteractiveCode";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
-import { CodeComparison } from "@/components/mdx/CodeComparison";
 import { Formula } from "@/components/mdx/Formula";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { TrainTestSplitDiagram, BiasVarianceDiagram, OneHotEncodingDiagram } from "@/components/mdx/diagrams";
 import { DataLeakageGame } from "@/components/games";
+import { module2Exercises } from "@/lib/code-exercise-data";
 
 export default function Module2Content() {
   return (
@@ -251,7 +252,7 @@ category_names = ohc.categories_[0]`}</CodeBlock>
         This is the #1 data leakage mistake. When you fit on test data, you&apos;re using &quot;future information&quot;
         that your model shouldn&apos;t have access to.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: fit_transform on test data = LEAKAGE!
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
@@ -264,6 +265,7 @@ X_test_scaled = scaler.transform(X_test)  # Correct!
 # Test data uses train's mean/std`}
         wrongExplanation="fit_transform() learns new parameters from test data. In production, you won't have test data to 'fit' on!"
         rightExplanation="transform() applies parameters learned from training. This simulates real production conditions."
+        exercise={module2Exercises[0]}
       />
 
       <h3>Mistake #2: Scaling Before Splitting</h3>
@@ -271,7 +273,7 @@ X_test_scaled = scaler.transform(X_test)  # Correct!
         If you scale all data first, the test set&apos;s statistics influence the training set&apos;s scaling.
         This is subtle but harmful leakage.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Scaling before splitting = LEAKAGE!
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)  # Uses ALL data
@@ -291,7 +293,7 @@ X_test_scaled = scaler.transform(X_test)
       <p>
         Polynomial features must also follow the fit/transform pattern. Apply them BEFORE scaling.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Wrong order + fit_transform on test
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
@@ -314,7 +316,7 @@ X_test_scaled = scaler.transform(X_test_poly)`}
       <p>
         Passing string data directly to models will crash or give meaningless results.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Passing strings to model
 data = pd.DataFrame({
     'category': ['A', 'B', 'A', 'C'],

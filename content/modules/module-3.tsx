@@ -1,12 +1,13 @@
 "use client";
 
 import { CodePlayground } from "@/components/code/CodePlayground";
+import { InteractiveCode } from "@/components/code/InteractiveCode";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
-import { CodeComparison } from "@/components/mdx/CodeComparison";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { KFoldDiagram, PipelineDiagram, GridSearchDiagram } from "@/components/mdx/diagrams";
 import { PipelineBuilderGame } from "@/components/games";
+import { module3Exercises } from "@/lib/code-exercise-data";
 
 export default function Module3Content() {
   return (
@@ -249,7 +250,7 @@ df_importances = pd.DataFrame(
         Manual preprocessing is error-prone. Each step must be applied consistently to both train and test data.
         Pipelines handle this automatically.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Manual steps - easy to make mistakes
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
@@ -276,13 +277,14 @@ pipeline.fit(X_train, y_train)
 predictions = pipeline.predict(X_test)`}
         wrongExplanation="Manual steps have two fit_transform bugs on test data. Easy to miss, causes data leakage."
         rightExplanation="Pipeline guarantees correct fit/transform behavior. It's also cleaner and less error-prone."
+        exercise={module3Exercises[0]}
       />
 
       <h3>Mistake #2: Wrong Parameter Syntax for GridSearchCV</h3>
       <p>
         When using pipelines with GridSearchCV, parameter names must follow the stepname__parameter format.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Missing step name prefix
 param_grid = {
     'degree': [1, 2, 3],  # Error! Which step?
@@ -305,7 +307,7 @@ grid = GridSearchCV(pipeline, param_grid, cv=5)
       <p>
         Using a single split to tune hyperparameters can lead to overfitting to that specific split.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Tuning on single split
 X_train, X_test, y_train, y_test = train_test_split(X, y)
 

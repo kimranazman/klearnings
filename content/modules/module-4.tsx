@@ -1,13 +1,14 @@
 "use client";
 
 import { CodePlayground } from "@/components/code/CodePlayground";
+import { InteractiveCode } from "@/components/code/InteractiveCode";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
-import { CodeComparison } from "@/components/mdx/CodeComparison";
 import { Formula } from "@/components/mdx/Formula";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { BiasVarianceTargetDiagram, RidgeLassoDiagram, RFEDiagram } from "@/components/mdx/diagrams";
 import { RegularizationGame } from "@/components/games";
+import { module4Exercises } from "@/lib/code-exercise-data";
 
 export default function Module4Content() {
   return (
@@ -240,7 +241,7 @@ print(f"Optimal features: {rfecv.n_features_}")`}</CodeBlock>
         This is the most common and harmful mistake. Regularization penalizes large coefficients,
         but &quot;large&quot; depends on the feature scale!
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Regularization without scaling
 X = data[['price', 'rating', 'inventory']]
 # price: $10-$500, rating: 1-5, inventory: 100-10000
@@ -260,13 +261,14 @@ model.fit(X_train_scaled, y_train)
 # Penalty is applied fairly to all`}
         wrongExplanation="Features with larger values (inventory) get penalized more than small-scale features (rating), regardless of importance."
         rightExplanation="StandardScaler puts all features on the same scale. Now regularization penalty is fair and meaningful."
+        exercise={module4Exercises[0]}
       />
 
       <h3>Mistake #2: Guessing Alpha Instead of Using CV</h3>
       <p>
         Manually picking alpha values is guesswork. Let cross-validation find the optimal value.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Guessing alpha
 model = Lasso(alpha=1.0)  # Why 1.0? Who knows!
 model.fit(X_train_scaled, y_train)
@@ -291,7 +293,7 @@ print(f"Best alpha: {model.alpha_}")
       <p>
         Ridge shrinks coefficients but never zeros them. If you need to eliminate features, use Lasso.
       </p>
-      <CodeComparison
+      <InteractiveCode
         wrongCode={`# WRONG: Using Ridge for feature selection
 # You have 50 features, suspect many are useless
 model = Ridge(alpha=10.0)
