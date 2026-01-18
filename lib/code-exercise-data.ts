@@ -900,6 +900,283 @@ print(f"Mean R²: {scores.mean():.3f}")
 print(f"Std: {scores.std():.3f}")
 print(f"\\n95% CI: {scores.mean():.3f} (+/- {scores.std() * 2:.3f})")`,
   },
+
+  // Exercise 3: GridSearchCV Parameter Syntax
+  {
+    id: "m3-gridsearch-syntax",
+    title: "GridSearchCV with Pipelines: Parameter Naming",
+    description: "Master the stepname__parameter syntax for tuning pipeline hyperparameters.",
+    steps: [
+      {
+        id: "step1",
+        title: "The problem: ambiguous parameter names",
+        code: `# Pipeline has multiple steps:
+pipeline = Pipeline([
+    ('poly', PolynomialFeatures()),
+    ('scaler', StandardScaler()),
+    ('model', Ridge())
+])
+
+# Which step owns 'degree'? Which owns 'alpha'?
+# GridSearchCV can't guess!`,
+        explanation: "A pipeline can have many steps, each with their own parameters. When you say 'degree', GridSearchCV doesn't know if you mean PolynomialFeatures degree or something else.",
+      },
+      {
+        id: "step2",
+        title: "The solution: double underscore notation",
+        code: `# Use: stepname__parametername
+param_grid = {
+    'poly__degree': [1, 2, 3],      # poly step's degree
+    'model__alpha': [0.01, 0.1, 1.0] # model step's alpha
+}`,
+        explanation: "The double underscore (__) connects the step name to its parameter. 'poly__degree' means 'the degree parameter of the step named poly'.",
+      },
+      {
+        id: "step3",
+        title: "Create and run GridSearchCV",
+        code: `grid = GridSearchCV(
+    pipeline,
+    param_grid,
+    cv=5,
+    scoring='r2'
+)
+grid.fit(X_train, y_train)`,
+        explanation: "GridSearchCV tests all combinations of parameters using cross-validation. With 3 degrees × 3 alphas × 5 folds = 45 model fits!",
+      },
+      {
+        id: "step4",
+        title: "Access the results",
+        code: `print(f"Best params: {grid.best_params_}")
+print(f"Best CV score: {grid.best_score_:.4f}")
+
+# Use the best model directly
+predictions = grid.predict(X_test)`,
+        explanation: "best_params_ shows the winning combination. best_score_ is the CV score. The grid object itself acts as the best model!",
+      },
+      {
+        id: "step5",
+        title: "Access nested attributes",
+        code: `# Get the best model's coefficients:
+best_model = grid.best_estimator_
+# Access the 'model' step inside the pipeline:
+ridge_coefs = best_model.named_steps['model'].coef_
+print(f"Coefficients: {ridge_coefs}")`,
+        explanation: "best_estimator_ is the actual fitted pipeline. Use named_steps['stepname'] to access individual components and their attributes like coefficients.",
+      },
+    ],
+    dragDropExercise: {
+      blocks: [
+        { id: "b1", code: "from sklearn.model_selection import GridSearchCV", label: "Import GridSearchCV" },
+        { id: "b2", code: "pipeline = Pipeline([('scaler', StandardScaler()), ('model', Ridge())])", label: "Create pipeline" },
+        { id: "b3", code: "param_grid = {'model__alpha': [0.01, 0.1, 1.0, 10.0]}", label: "Define param_grid" },
+        { id: "b4", code: "grid = GridSearchCV(pipeline, param_grid, cv=5)", label: "Create GridSearchCV" },
+        { id: "b5", code: "grid.fit(X_train, y_train)", label: "Fit grid search" },
+        { id: "b6", code: "print(f'Best alpha: {grid.best_params_}')", label: "Show best params" },
+      ],
+      correctOrder: ["b1", "b2", "b3", "b4", "b5", "b6"],
+      hints: [
+        "Import first, as always.",
+        "You need a pipeline before you can search its parameters.",
+        "param_grid uses stepname__param format - notice the double underscore!",
+        "Create GridSearchCV, then fit it, then inspect results.",
+      ],
+    },
+    runnableCode: `# GridSearchCV with Pipeline: Correct Parameter Syntax
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, PolynomialFeatures
+from sklearn.linear_model import Ridge
+from sklearn.model_selection import GridSearchCV, train_test_split
+import numpy as np
+
+np.random.seed(42)
+
+# Create non-linear data
+X = np.random.randn(100, 2)
+y = X[:, 0]**2 + 0.5 * X[:, 1] + np.random.randn(100) * 0.5
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Create pipeline with named steps
+pipeline = Pipeline([
+    ('poly', PolynomialFeatures(include_bias=False)),
+    ('scaler', StandardScaler()),
+    ('model', Ridge())
+])
+
+# Parameter grid using stepname__parameter syntax
+param_grid = {
+    'poly__degree': [1, 2, 3],           # PolynomialFeatures parameter
+    'model__alpha': [0.01, 0.1, 1.0]     # Ridge parameter
+}
+
+print("Testing", 3 * 3, "parameter combinations with 5-fold CV...")
+print("Total model fits:", 3 * 3 * 5)
+
+# Run grid search
+grid = GridSearchCV(pipeline, param_grid, cv=5, scoring='r2')
+grid.fit(X_train, y_train)
+
+print(f"\\nBest parameters: {grid.best_params_}")
+print(f"Best CV R² score: {grid.best_score_:.4f}")
+
+# Test set performance
+test_score = grid.score(X_test, y_test)
+print(f"Test R² score: {test_score:.4f}")
+
+# Access the best model's details
+best_pipeline = grid.best_estimator_
+print(f"\\nBest model coefficients: {best_pipeline.named_steps['model'].coef_.round(3)}")`,
+    wrongCode: `# WRONG: Missing step name prefix
+param_grid = {
+    'degree': [1, 2, 3],  # Error! Which step?
+    'alpha': [0.01, 0.1, 1.0]  # Error! Which model?
+}`,
+    wrongExplanation: "GridSearchCV doesn't know which step owns 'degree' or 'alpha'. Parameters are ambiguous.",
+    rightExplanation: "Double underscore (stepname__param) tells GridSearchCV exactly which step to configure.",
+  },
+
+  // Exercise 4: GridSearchCV vs Single Split
+  {
+    id: "m3-gridsearch-vs-single",
+    title: "Why GridSearchCV Beats Manual Tuning",
+    description: "Learn why cross-validation is essential for reliable hyperparameter tuning.",
+    steps: [
+      {
+        id: "step1",
+        title: "The tempting (but wrong) approach",
+        code: `# Manual tuning on a single test set
+X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+best_alpha = None
+best_score = 0
+for alpha in [0.01, 0.1, 1.0, 10.0]:
+    model = Ridge(alpha=alpha)
+    model.fit(X_train, y_train)
+    score = model.score(X_test, y_test)
+    if score > best_score:
+        best_score, best_alpha = score, alpha`,
+        explanation: "This seems reasonable - try different alphas, pick the best. But there's a hidden problem: you're repeatedly peeking at the same test set!",
+      },
+      {
+        id: "step2",
+        title: "Why single-split tuning fails",
+        code: `# Problem: You're overfitting to ONE specific test set
+#
+# Imagine the test set happens to have:
+# - Mostly easy-to-predict samples
+# - A lucky random split
+# - Unusual distribution
+#
+# The "best" alpha might only work for THIS split!`,
+        explanation: "By testing many alphas on the same test set, you're essentially 'fitting' to that test set. The winning alpha might be lucky for this particular split but fail on new data.",
+      },
+      {
+        id: "step3",
+        title: "The solution: cross-validation",
+        code: `from sklearn.model_selection import GridSearchCV
+
+param_grid = {'alpha': [0.01, 0.1, 1.0, 10.0]}
+grid = GridSearchCV(Ridge(), param_grid, cv=5)
+grid.fit(X_train, y_train)`,
+        explanation: "GridSearchCV tests each alpha on 5 DIFFERENT validation sets. The winning alpha must perform well across all of them - not just one lucky split.",
+      },
+      {
+        id: "step4",
+        title: "Interpreting CV results",
+        code: `print(f"Best alpha: {grid.best_params_['alpha']}")
+print(f"Mean CV score: {grid.best_score_:.4f}")
+
+# This is more reliable because:
+# - Tested on 5 different validation folds
+# - Not overfit to any single split
+# - Generalizes better to truly unseen data`,
+        explanation: "The CV score is an average across 5 folds. This gives you confidence that the parameter choice is robust, not lucky.",
+      },
+      {
+        id: "step5",
+        title: "The complete workflow",
+        code: `# 1. Split off a TRUE test set (never touched during tuning)
+X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+# 2. Use CV to tune on training data only
+grid = GridSearchCV(Ridge(), param_grid, cv=5)
+grid.fit(X_train, y_train)  # CV happens inside X_train
+
+# 3. Final evaluation on untouched test set
+final_score = grid.score(X_test, y_test)
+print(f"True test score: {final_score:.4f}")`,
+        explanation: "Best practice: hold out a test set that's NEVER used during tuning. Use CV only on training data. Final evaluation on the held-out test set gives an honest estimate.",
+      },
+    ],
+    dragDropExercise: {
+      blocks: [
+        { id: "b1", code: "X_train, X_test, y_train, y_test = train_test_split(X, y)", label: "Hold out test set" },
+        { id: "b2", code: "param_grid = {'alpha': [0.01, 0.1, 1.0, 10.0]}", label: "Define search space" },
+        { id: "b3", code: "grid = GridSearchCV(Ridge(), param_grid, cv=5)", label: "Create GridSearchCV" },
+        { id: "b4", code: "grid.fit(X_train, y_train)", label: "Fit (CV on train only)" },
+        { id: "b5", code: "final_score = grid.score(X_test, y_test)", label: "Evaluate on test" },
+      ],
+      correctOrder: ["b1", "b2", "b3", "b4", "b5"],
+      hints: [
+        "First, split off a test set that will NEVER be used during tuning.",
+        "Define what parameters to search before creating GridSearchCV.",
+        "GridSearchCV does cross-validation internally on the training data.",
+        "Final evaluation uses the held-out test set for an honest score.",
+      ],
+    },
+    runnableCode: `# GridSearchCV vs Manual Tuning: Why CV Wins
+from sklearn.linear_model import Ridge
+from sklearn.model_selection import GridSearchCV, train_test_split, cross_val_score
+import numpy as np
+
+np.random.seed(42)
+
+# Create data
+X = np.random.randn(200, 5)
+y = X[:, 0] * 2 + X[:, 1] * 0.5 - X[:, 2] * 1.5 + np.random.randn(200) * 0.5
+
+# Hold out a TRUE test set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+alphas = [0.001, 0.01, 0.1, 1.0, 10.0]
+
+print("=== WRONG: Manual tuning on single split ===")
+# Simulate what happens with manual single-split tuning
+X_tr, X_val, y_tr, y_val = train_test_split(X_train, y_train, test_size=0.3, random_state=99)
+manual_results = {}
+for alpha in alphas:
+    model = Ridge(alpha=alpha)
+    model.fit(X_tr, y_tr)
+    manual_results[alpha] = model.score(X_val, y_val)
+
+best_manual = max(manual_results, key=manual_results.get)
+print(f"Best alpha (single split): {best_manual}")
+print(f"Validation score: {manual_results[best_manual]:.4f}")
+
+print("\\n=== RIGHT: GridSearchCV with cross-validation ===")
+param_grid = {'alpha': alphas}
+grid = GridSearchCV(Ridge(), param_grid, cv=5, scoring='r2')
+grid.fit(X_train, y_train)
+
+print(f"Best alpha (5-fold CV): {grid.best_params_['alpha']}")
+print(f"Mean CV score: {grid.best_score_:.4f}")
+
+print("\\n=== Final Test Set Evaluation ===")
+# Evaluate both approaches on the held-out test set
+manual_model = Ridge(alpha=best_manual).fit(X_train, y_train)
+manual_test = manual_model.score(X_test, y_test)
+cv_test = grid.score(X_test, y_test)
+
+print(f"Manual tuning test score: {manual_test:.4f}")
+print(f"GridSearchCV test score:  {cv_test:.4f}")
+print("\\nCV-tuned model is more reliable on new data!")`,
+    wrongCode: `# WRONG: Tuning on single split
+for alpha in [0.01, 0.1, 1.0]:
+    model.fit(X_train, y_train)
+    score = model.score(X_test, y_test)  # Same test set every time!`,
+    wrongExplanation: "Tuning on a single test set can find parameters that work well on that specific split but not generally.",
+    rightExplanation: "Cross-validation tests each parameter setting on multiple folds, giving reliable performance estimates.",
+  },
 ];
 
 // Module 4: Regularization

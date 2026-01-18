@@ -301,6 +301,7 @@ grid = GridSearchCV(pipeline, param_grid, cv=5)
 # Works correctly!`}
         wrongExplanation="GridSearchCV doesn't know which step owns 'degree' or 'alpha'. Parameters are ambiguous."
         rightExplanation="Double underscore (stepname__param) tells GridSearchCV exactly which step to configure."
+        exercise={module3Exercises[2]}
       />
 
       <h3>Mistake #3: Single Train-Test Split for Hyperparameter Tuning</h3>
@@ -332,6 +333,7 @@ print(f"CV Score: {grid.best_score_:.4f}")
 # Reliable across multiple validation folds`}
         wrongExplanation="Tuning on a single test set can find parameters that work well on that specific split but not generally."
         rightExplanation="Cross-validation tests each parameter setting on multiple folds, giving reliable performance estimates."
+        exercise={module3Exercises[3]}
       />
 
       <h2>Practice: Build the Pipeline</h2>
