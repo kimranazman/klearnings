@@ -73,8 +73,10 @@ export function GlossaryHighlighter({ children, onTermClick }: GlossaryHighlight
             tagName === 'button' ||
             tagName === 'input' ||
             tagName === 'textarea' ||
+            tagName === 'a' ||
             parent.closest('code') ||
             parent.closest('pre') ||
+            parent.closest('a') ||
             parent.closest('.code-playground') ||
             parent.closest('[data-no-glossary]')
           ) {

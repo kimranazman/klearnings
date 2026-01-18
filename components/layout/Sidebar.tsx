@@ -98,7 +98,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                       >
                         {/* Hover glow effect */}
                         {!isActive && (
-                          <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-[var(--gradient-start)]/5 to-transparent" />
+                          <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-[var(--gradient-start)]/5 to-transparent pointer-events-none" />
                         )}
 
                         <div className="flex-shrink-0 relative z-10">
