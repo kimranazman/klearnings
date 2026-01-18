@@ -99,13 +99,14 @@ export function GlossaryPopup() {
   useEffect(() => {
     document.addEventListener("mouseup", handleSelection);
     document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("click", handleTermClick, true);
+    // Use bubble phase instead of capture phase to avoid interfering with Next.js Link navigation
+    document.addEventListener("click", handleTermClick);
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
       document.removeEventListener("mouseup", handleSelection);
       document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("click", handleTermClick, true);
+      document.removeEventListener("click", handleTermClick);
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [handleSelection, handleKeyDown, handleTermClick, handleClickOutside]);

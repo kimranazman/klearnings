@@ -52,20 +52,25 @@ export function useProgress() {
   // Mark module as read
   const markModuleRead = useCallback(
     (slug: string) => {
-      if (!progress.modulesRead.includes(slug)) {
+      const alreadyRead = progress.modulesRead.includes(slug);
+      const lastVisitedSame = progress.lastVisited === slug;
+
+      if (!alreadyRead) {
+        // New module - add to modulesRead and update lastVisited
         const newProgress = {
           ...progress,
           modulesRead: [...progress.modulesRead, slug],
           lastVisited: slug,
         };
         saveProgress(newProgress);
-      } else {
-        // Just update lastVisited
+      } else if (!lastVisitedSame) {
+        // Already read but lastVisited is different - update lastVisited only
         saveProgress({
           ...progress,
           lastVisited: slug,
         });
       }
+      // If already read AND lastVisited is same, do nothing to prevent re-render loop
     },
     [progress, saveProgress]
   );

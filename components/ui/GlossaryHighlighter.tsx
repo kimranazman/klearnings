@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
-import { glossaryTerms, findGlossaryTerm, GlossaryTerm } from "@/lib/glossary";
+import { useEffect, useRef } from "react";
+import { glossaryTerms } from "@/lib/glossary";
 
 interface GlossaryHighlighterProps {
   children: React.ReactNode;
-  onTermClick?: (term: GlossaryTerm, rect: DOMRect) => void;
 }
 
 // Build a regex pattern that matches all glossary terms
@@ -26,25 +25,9 @@ function buildTermsPattern(): RegExp {
 
 const TERMS_PATTERN = buildTermsPattern();
 
-export function GlossaryHighlighter({ children, onTermClick }: GlossaryHighlighterProps) {
+export function GlossaryHighlighter({ children }: GlossaryHighlighterProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const processedRef = useRef(false);
-
-  const handleTermClick = useCallback((e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.classList.contains('glossary-term')) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const termText = target.textContent || '';
-      const term = findGlossaryTerm(termText);
-
-      if (term && onTermClick) {
-        const rect = target.getBoundingClientRect();
-        onTermClick(term, rect);
-      }
-    }
-  }, [onTermClick]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -145,14 +128,8 @@ export function GlossaryHighlighter({ children, onTermClick }: GlossaryHighlight
         parent.replaceChild(fragment, textNode);
       }
     });
-
-    // Add click listener for terms
-    container.addEventListener('click', handleTermClick);
-
-    return () => {
-      container.removeEventListener('click', handleTermClick);
-    };
-  }, [handleTermClick]);
+    // Click handling is done by GlossaryPopup at document level
+  }, []);
 
   // Reset processed flag when children change significantly
   useEffect(() => {
