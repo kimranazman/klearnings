@@ -287,6 +287,7 @@ X_test_scaled = scaler.transform(X_test)
 # Training and test are fully independent`}
         wrongExplanation="The scaler learns statistics from ALL data including test. Your training data now contains test information."
         rightExplanation="Split first, then fit transformers only on training data. This maintains true separation."
+        exercise={module2Exercises[1]}
       />
 
       <h3>Mistake #3: Polynomial Features with Wrong Order</h3>
@@ -310,6 +311,7 @@ X_train_scaled = scaler.fit_transform(X_train_poly)
 X_test_scaled = scaler.transform(X_test_poly)`}
         wrongExplanation="Wrong order and fit_transform on test data. This creates features differently for train vs test."
         rightExplanation="Polynomial features first, then scaling. Each step uses fit on train, transform on test."
+        exercise={module2Exercises[2]}
       />
 
       <h3>Mistake #4: Forgetting to Encode Categorical Variables</h3>
@@ -331,6 +333,7 @@ X = np.hstack([categories, data[['value']].values])
 model.fit(X, y)  # Works correctly`}
         wrongExplanation="Machine learning models need numbers. Strings like 'A', 'B', 'C' are meaningless to them."
         rightExplanation="One-hot encoding converts categories to binary columns (0s and 1s) that models can understand."
+        exercise={module2Exercises[3]}
       />
 
       <h2>Practice: Spot the Data Leakage</h2>
