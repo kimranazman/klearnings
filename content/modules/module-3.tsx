@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { CodeComparison } from "@/components/mdx/CodeComparison";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { KFoldDiagram, PipelineDiagram, GridSearchDiagram } from "@/components/mdx/diagrams";
 import { PipelineBuilderGame } from "@/components/games";
@@ -237,6 +238,99 @@ df_importances = pd.DataFrame(
     list(zip(feature_names, coefficients)),
     columns=['Feature', 'Coefficient']
 ).sort_values('Coefficient', key=abs, ascending=False)`}</CodeBlock>
+
+      <h2>Common Mistakes to Avoid</h2>
+      <p>
+        Pipelines and cross-validation have subtle gotchas. Here are mistakes that even AI-generated code often makes.
+      </p>
+
+      <h3>Mistake #1: Manual Steps Instead of Pipeline</h3>
+      <p>
+        Manual preprocessing is error-prone. Each step must be applied consistently to both train and test data.
+        Pipelines handle this automatically.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Manual steps - easy to make mistakes
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.fit_transform(X_test)  # BUG!
+
+poly = PolynomialFeatures(degree=2)
+X_train_poly = poly.fit_transform(X_train_scaled)
+X_test_poly = poly.fit_transform(X_test_scaled)  # BUG!
+
+model = Ridge()
+model.fit(X_train_poly, y_train)`}
+        rightCode={`# RIGHT: Pipeline handles everything correctly
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline([
+    ('poly', PolynomialFeatures(degree=2)),
+    ('scaler', StandardScaler()),
+    ('model', Ridge())
+])
+
+# Pipeline automatically applies fit_transform to train
+# and transform to test during cross-validation
+pipeline.fit(X_train, y_train)
+predictions = pipeline.predict(X_test)`}
+        wrongExplanation="Manual steps have two fit_transform bugs on test data. Easy to miss, causes data leakage."
+        rightExplanation="Pipeline guarantees correct fit/transform behavior. It's also cleaner and less error-prone."
+      />
+
+      <h3>Mistake #2: Wrong Parameter Syntax for GridSearchCV</h3>
+      <p>
+        When using pipelines with GridSearchCV, parameter names must follow the stepname__parameter format.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Missing step name prefix
+param_grid = {
+    'degree': [1, 2, 3],  # Error! Which step?
+    'alpha': [0.01, 0.1, 1.0]  # Error! Which model?
+}
+grid = GridSearchCV(pipeline, param_grid, cv=5)
+# ValueError: Invalid parameter`}
+        rightCode={`# RIGHT: Use stepname__parameter format
+param_grid = {
+    'poly__degree': [1, 2, 3],  # poly step's degree
+    'model__alpha': [0.01, 0.1, 1.0]  # model step's alpha
+}
+grid = GridSearchCV(pipeline, param_grid, cv=5)
+# Works correctly!`}
+        wrongExplanation="GridSearchCV doesn't know which step owns 'degree' or 'alpha'. Parameters are ambiguous."
+        rightExplanation="Double underscore (stepname__param) tells GridSearchCV exactly which step to configure."
+      />
+
+      <h3>Mistake #3: Single Train-Test Split for Hyperparameter Tuning</h3>
+      <p>
+        Using a single split to tune hyperparameters can lead to overfitting to that specific split.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Tuning on single split
+X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+best_alpha = None
+best_score = 0
+for alpha in [0.01, 0.1, 1.0, 10.0]:
+    model = Ridge(alpha=alpha)
+    model.fit(X_train, y_train)
+    score = model.score(X_test, y_test)  # Same test set!
+    if score > best_score:
+        best_score, best_alpha = score, alpha
+# Might overfit to this particular test set`}
+        rightCode={`# RIGHT: Cross-validation for tuning
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {'alpha': [0.01, 0.1, 1.0, 10.0]}
+grid = GridSearchCV(Ridge(), param_grid, cv=5)
+grid.fit(X, y)
+
+print(f"Best alpha: {grid.best_params_['alpha']}")
+print(f"CV Score: {grid.best_score_:.4f}")
+# Reliable across multiple validation folds`}
+        wrongExplanation="Tuning on a single test set can find parameters that work well on that specific split but not generally."
+        rightExplanation="Cross-validation tests each parameter setting on multiple folds, giving reliable performance estimates."
+      />
 
       <h2>Practice: Build the Pipeline</h2>
       <p>

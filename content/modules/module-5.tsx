@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { CodeComparison } from "@/components/mdx/CodeComparison";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { ConstraintRegionsDiagram, PriorDistributionsDiagram, FeatureScalingDiagram, AlphaEffectDiagram } from "@/components/mdx/diagrams";
 import { CoefficientMatchingGame } from "@/components/games";
@@ -234,6 +235,102 @@ lasso.fit(X_train_scaled, y_train)
 y_pred = lasso.predict(X_test_scaled)
 r2 = r2_score(y_test, y_pred)
 print(f"R2 Score: {r2:.4f}")`}</CodeBlock>
+
+      <h2>Common Mistakes to Avoid</h2>
+      <p>
+        Model interpretation requires proper scaling. Here are mistakes that lead to incorrect conclusions.
+      </p>
+
+      <h3>Mistake #1: Comparing Coefficients Without Scaling</h3>
+      <p>
+        Without standardization, coefficient magnitudes are meaningless for comparison.
+        A coefficient of 0.001 might be more important than one of 100!
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Interpreting unscaled coefficients
+# Features: price ($10-$500), rating (1-5)
+model = Lasso(alpha=0.1)
+model.fit(X_train, y_train)
+
+# price coefficient: 0.05
+# rating coefficient: 10.5
+print("Rating is 210x more important than price!")
+# WRONG! Coefficients aren't comparable`}
+        rightCode={`# RIGHT: Scale first, then interpret
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+
+model = Lasso(alpha=0.1)
+model.fit(X_train_scaled, y_train)
+
+# Now coefficients are comparable
+# price coefficient: 2.1
+# rating coefficient: 1.8
+print("Price is slightly more important than rating")
+# Correct interpretation`}
+        wrongExplanation="Unscaled coefficients depend on feature units. Price in dollars vs rating in stars aren't comparable."
+        rightExplanation="After scaling, both features have std=1. Coefficients now represent impact per standard deviation."
+      />
+
+      <h3>Mistake #2: Forgetting max_iter for Lasso</h3>
+      <p>
+        Lasso uses iterative optimization. With default iterations, it may not converge on complex data.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Default max_iter might not converge
+lasso = Lasso(alpha=0.01)
+lasso.fit(X_train_scaled, y_train)
+# ConvergenceWarning: Objective did not converge.
+# You might want to increase the number of iterations.
+
+# Results are unreliable!`}
+        rightCode={`# RIGHT: Increase max_iter for convergence
+lasso = Lasso(alpha=0.01, max_iter=10000)
+lasso.fit(X_train_scaled, y_train)
+# No warning - algorithm converged properly
+
+# Or use LassoCV which handles this better
+from sklearn.linear_model import LassoCV
+lasso_cv = LassoCV(cv=5, max_iter=10000)
+lasso_cv.fit(X_train_scaled, y_train)`}
+        wrongExplanation="If optimization doesn't converge, coefficients are essentially random. Results are meaningless."
+        rightExplanation="max_iter=10000 gives the algorithm enough iterations. Always check for convergence warnings!"
+      />
+
+      <h3>Mistake #3: Using Coefficients for Production Without Pipeline</h3>
+      <p>
+        In production, you need to apply the exact same preprocessing. Manual steps are error-prone.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Manual steps for production
+# Training
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+model = Lasso(alpha=0.1)
+model.fit(X_train_scaled, y_train)
+
+# Production - easy to forget a step!
+def predict(new_data):
+    # Oops, forgot to scale!
+    return model.predict(new_data)
+    # Or used wrong scaler
+    # Or scaled with fit_transform`}
+        rightCode={`# RIGHT: Pipeline for production
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('model', Lasso(alpha=0.1, max_iter=10000))
+])
+pipeline.fit(X_train, y_train)
+
+# Production - pipeline handles everything
+def predict(new_data):
+    return pipeline.predict(new_data)
+# Scaler automatically applied correctly!`}
+        wrongExplanation="Manual preprocessing in production is error-prone. One forgotten step ruins predictions."
+        rightExplanation="Pipeline encapsulates all steps. Just call predict() and everything is applied correctly."
+      />
 
       <h2>Quick Reference: Ridge vs Lasso</h2>
 

@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { CodeComparison } from "@/components/mdx/CodeComparison";
 import { Formula } from "@/components/mdx/Formula";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { BiasVarianceTargetDiagram, RidgeLassoDiagram, RFEDiagram } from "@/components/mdx/diagrams";
@@ -228,6 +229,91 @@ rfe.fit(X_train_scaled, y_train)
 rfecv = RFECV(estimator, cv=5)
 rfecv.fit(X_train_scaled, y_train)
 print(f"Optimal features: {rfecv.n_features_}")`}</CodeBlock>
+
+      <h2>Common Mistakes to Avoid</h2>
+      <p>
+        Regularization is powerful but easy to misuse. Here are critical mistakes to watch for.
+      </p>
+
+      <h3>Mistake #1: Not Scaling Before Regularization</h3>
+      <p>
+        This is the most common and harmful mistake. Regularization penalizes large coefficients,
+        but &quot;large&quot; depends on the feature scale!
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Regularization without scaling
+X = data[['price', 'rating', 'inventory']]
+# price: $10-$500, rating: 1-5, inventory: 100-10000
+
+model = Lasso(alpha=0.1)
+model.fit(X_train, y_train)
+# Penalty unfairly hits 'inventory' (large values)
+# while barely affecting 'rating' (small values)`}
+        rightCode={`# RIGHT: Scale first, then regularize
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+model = Lasso(alpha=0.1)
+model.fit(X_train_scaled, y_train)
+# Now all features are on same scale (mean=0, std=1)
+# Penalty is applied fairly to all`}
+        wrongExplanation="Features with larger values (inventory) get penalized more than small-scale features (rating), regardless of importance."
+        rightExplanation="StandardScaler puts all features on the same scale. Now regularization penalty is fair and meaningful."
+      />
+
+      <h3>Mistake #2: Guessing Alpha Instead of Using CV</h3>
+      <p>
+        Manually picking alpha values is guesswork. Let cross-validation find the optimal value.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Guessing alpha
+model = Lasso(alpha=1.0)  # Why 1.0? Who knows!
+model.fit(X_train_scaled, y_train)
+# Maybe 1.0 is too strong (underfitting)
+# Maybe it's too weak (overfitting)
+# You're just guessing`}
+        rightCode={`# RIGHT: Let CV find optimal alpha
+from sklearn.linear_model import LassoCV
+
+model = LassoCV(
+    alphas=[0.001, 0.01, 0.1, 1.0, 10.0],
+    cv=5
+)
+model.fit(X_train_scaled, y_train)
+print(f"Best alpha: {model.alpha_}")
+# Automatically tested all alphas with 5-fold CV`}
+        wrongExplanation="Manually chosen alpha might be far from optimal. You're leaving performance on the table."
+        rightExplanation="LassoCV tests multiple alphas with cross-validation and automatically selects the best one."
+      />
+
+      <h3>Mistake #3: Using Ridge When You Need Feature Selection</h3>
+      <p>
+        Ridge shrinks coefficients but never zeros them. If you need to eliminate features, use Lasso.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Using Ridge for feature selection
+# You have 50 features, suspect many are useless
+model = Ridge(alpha=10.0)
+model.fit(X_train_scaled, y_train)
+
+# Ridge shrinks all coefficients but keeps all 50
+print(np.sum(model.coef_ != 0))  # Still 50!
+# No feature selection happened`}
+        rightCode={`# RIGHT: Use Lasso for feature selection
+model = Lasso(alpha=0.1)
+model.fit(X_train_scaled, y_train)
+
+# Lasso zeros out unimportant features
+print(np.sum(model.coef_ != 0))  # Maybe 15!
+# 35 features eliminated automatically
+
+# See which features survived
+important = np.where(model.coef_ != 0)[0]
+print(f"Important features: {important}")`}
+        wrongExplanation="Ridge never sets coefficients exactly to zero. All 50 features stay in the model."
+        rightExplanation="Lasso's L1 penalty drives unimportant coefficients to exactly zero, performing automatic feature selection."
+      />
 
       <h2>Practice: Tune the Regularization</h2>
       <p>

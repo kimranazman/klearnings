@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { CodeComparison } from "@/components/mdx/CodeComparison";
 import { Formula } from "@/components/mdx/Formula";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { SupervisedLearningDiagram } from "@/components/mdx/diagrams";
@@ -250,6 +251,76 @@ X_scaled = scaler.transform(X_train)
 
 # Combined fit_transform (for training data only)
 X_train_scaled = scaler.fit_transform(X_train)`}</CodeBlock>
+
+      <h2>Common Mistakes to Avoid</h2>
+      <p>
+        When using AI tools like ChatGPT or Claude to generate code, watch out for these common errors.
+        Even AI-generated code can have these issues!
+      </p>
+
+      <h3>Mistake #1: Testing on Training Data</h3>
+      <p>
+        This is like studying the exact exam questions, then claiming you &quot;learned&quot; the material
+        when you ace the test. Your model will look great but fail on new data.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Testing on the same data you trained on
+model = LinearRegression()
+model.fit(X, y)  # Train on ALL data
+predictions = model.predict(X)  # Test on SAME data
+r2 = r2_score(y, predictions)  # Misleading score!
+# R² will be artificially high`}
+        rightCode={`# RIGHT: Split data, test on unseen data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+model = LinearRegression()
+model.fit(X_train, y_train)  # Train on 70%
+predictions = model.predict(X_test)  # Test on 30%
+r2 = r2_score(y_test, predictions)  # Honest score`}
+        wrongExplanation="Model memorizes training data, giving falsely optimistic metrics that won't hold up in production."
+        rightExplanation="Model is evaluated on data it has never seen, giving realistic performance estimates."
+      />
+
+      <h3>Mistake #2: Forgetting to Fit Before Predict</h3>
+      <p>
+        The model needs to &quot;learn&quot; from training data before it can make predictions.
+        Skipping fit() is like taking an exam without studying.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Predicting without fitting first
+model = LinearRegression()
+predictions = model.predict(X_test)  # Error!
+# NotFittedError: This LinearRegression
+# instance is not fitted yet`}
+        rightCode={`# RIGHT: Always fit before predict
+model = LinearRegression()
+model.fit(X_train, y_train)  # Learn first
+predictions = model.predict(X_test)  # Then predict`}
+        wrongExplanation="The model has no learned parameters yet. It doesn't know what coefficients to use."
+        rightExplanation="fit() learns the coefficients from training data, then predict() uses them."
+      />
+
+      <h3>Mistake #3: Using Wrong Metric for the Problem</h3>
+      <p>
+        Using classification metrics for regression (or vice versa) gives meaningless results.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Using accuracy for regression
+from sklearn.metrics import accuracy_score
+model.fit(X_train, y_train)
+predictions = model.predict(X_test)
+# This will fail or give nonsense!
+score = accuracy_score(y_test, predictions)`}
+        rightCode={`# RIGHT: Use regression metrics for regression
+from sklearn.metrics import r2_score, mean_squared_error
+model.fit(X_train, y_train)
+predictions = model.predict(X_test)
+r2 = r2_score(y_test, predictions)
+mse = mean_squared_error(y_test, predictions)`}
+        wrongExplanation="Accuracy is for classification (categories). It makes no sense for continuous predictions like $47.52."
+        rightExplanation="R² and MSE are designed for regression. They measure how close your numbers are to the actual values."
+      />
 
       <h2>Practice: Guess the Regression Line</h2>
       <p>

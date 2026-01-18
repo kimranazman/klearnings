@@ -3,6 +3,7 @@
 import { CodePlayground } from "@/components/code/CodePlayground";
 import { Callout } from "@/components/mdx/Callout";
 import { CodeBlock } from "@/components/mdx/CodeBlock";
+import { CodeComparison } from "@/components/mdx/CodeComparison";
 import { Formula } from "@/components/mdx/Formula";
 import { MustKnow } from "@/components/mdx/MustKnow";
 import { TrainTestSplitDiagram, BiasVarianceDiagram, OneHotEncodingDiagram } from "@/components/mdx/diagrams";
@@ -239,6 +240,96 @@ encoded_data = ohc.fit_transform(data[['category_column']])
 category_names = ohc.categories_[0]`}</CodeBlock>
 
       <OneHotEncodingDiagram />
+
+      <h2>Common Mistakes to Avoid</h2>
+      <p>
+        Data leakage is subtle and dangerous. Here are the most common mistakes that even AI-generated code often makes.
+      </p>
+
+      <h3>Mistake #1: Using fit_transform on Test Data</h3>
+      <p>
+        This is the #1 data leakage mistake. When you fit on test data, you&apos;re using &quot;future information&quot;
+        that your model shouldn&apos;t have access to.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: fit_transform on test data = LEAKAGE!
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.fit_transform(X_test)  # BUG!
+# Test data now has its own mean/std, not train's`}
+        rightCode={`# RIGHT: fit on train, transform on test
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)  # Correct!
+# Test data uses train's mean/std`}
+        wrongExplanation="fit_transform() learns new parameters from test data. In production, you won't have test data to 'fit' on!"
+        rightExplanation="transform() applies parameters learned from training. This simulates real production conditions."
+      />
+
+      <h3>Mistake #2: Scaling Before Splitting</h3>
+      <p>
+        If you scale all data first, the test set&apos;s statistics influence the training set&apos;s scaling.
+        This is subtle but harmful leakage.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Scaling before splitting = LEAKAGE!
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)  # Uses ALL data
+X_train, X_test = train_test_split(X_scaled)
+# Test data's mean/std leaked into training!`}
+        rightCode={`# RIGHT: Split first, then scale
+X_train, X_test = train_test_split(X)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+# Training and test are fully independent`}
+        wrongExplanation="The scaler learns statistics from ALL data including test. Your training data now contains test information."
+        rightExplanation="Split first, then fit transformers only on training data. This maintains true separation."
+      />
+
+      <h3>Mistake #3: Polynomial Features with Wrong Order</h3>
+      <p>
+        Polynomial features must also follow the fit/transform pattern. Apply them BEFORE scaling.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Wrong order + fit_transform on test
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+poly = PolynomialFeatures(degree=2)
+X_train_poly = poly.fit_transform(X_train_scaled)
+X_test_poly = poly.fit_transform(X_test)  # Double bug!`}
+        rightCode={`# RIGHT: Poly first, then scale, proper fit/transform
+poly = PolynomialFeatures(degree=2)
+X_train_poly = poly.fit_transform(X_train)
+X_test_poly = poly.transform(X_test)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train_poly)
+X_test_scaled = scaler.transform(X_test_poly)`}
+        wrongExplanation="Wrong order and fit_transform on test data. This creates features differently for train vs test."
+        rightExplanation="Polynomial features first, then scaling. Each step uses fit on train, transform on test."
+      />
+
+      <h3>Mistake #4: Forgetting to Encode Categorical Variables</h3>
+      <p>
+        Passing string data directly to models will crash or give meaningless results.
+      </p>
+      <CodeComparison
+        wrongCode={`# WRONG: Passing strings to model
+data = pd.DataFrame({
+    'category': ['A', 'B', 'A', 'C'],
+    'value': [1, 2, 3, 4]
+})
+model.fit(data, y)  # Error or nonsense!
+# ValueError: could not convert string`}
+        rightCode={`# RIGHT: One-hot encode categories first
+encoder = OneHotEncoder(drop='first', sparse_output=False)
+categories = encoder.fit_transform(data[['category']])
+X = np.hstack([categories, data[['value']].values])
+model.fit(X, y)  # Works correctly`}
+        wrongExplanation="Machine learning models need numbers. Strings like 'A', 'B', 'C' are meaningless to them."
+        rightExplanation="One-hot encoding converts categories to binary columns (0s and 1s) that models can understand."
+      />
 
       <h2>Practice: Spot the Data Leakage</h2>
       <p>
