@@ -297,6 +297,7 @@ lasso_cv = LassoCV(cv=5, max_iter=10000)
 lasso_cv.fit(X_train_scaled, y_train)`}
         wrongExplanation="If optimization doesn't converge, coefficients are essentially random. Results are meaningless."
         rightExplanation="max_iter=10000 gives the algorithm enough iterations. Always check for convergence warnings!"
+        exercise={module5Exercises[1]}
       />
 
       <h3>Mistake #3: Using Coefficients for Production Without Pipeline</h3>
@@ -332,6 +333,7 @@ def predict(new_data):
 # Scaler automatically applied correctly!`}
         wrongExplanation="Manual preprocessing in production is error-prone. One forgotten step ruins predictions."
         rightExplanation="Pipeline encapsulates all steps. Just call predict() and everything is applied correctly."
+        exercise={module5Exercises[2]}
       />
 
       <h2>Quick Reference: Ridge vs Lasso</h2>

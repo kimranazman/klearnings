@@ -1551,6 +1551,230 @@ print(f"\\nLinear R²: {r2_linear:.3f}")
 print(f"Polynomial R²: {r2_poly:.3f}")
 print("\\nPolynomial features capture the curve!")`,
   },
+
+  // Exercise 2: max_iter for Lasso convergence
+  {
+    id: "m5-max-iter",
+    title: "Lasso Convergence: Why max_iter Matters",
+    description: "Learn why Lasso needs more iterations and how to avoid convergence warnings.",
+    steps: [
+      {
+        id: "step1",
+        title: "The problem: Lasso uses iterative optimization",
+        code: `# Lasso doesn't have a closed-form solution
+# It uses coordinate descent (iterative)
+
+lasso = Lasso(alpha=0.01)  # Default max_iter=1000
+lasso.fit(X_train, y_train)
+# ConvergenceWarning!`,
+        explanation: "Unlike Ridge (which has a closed-form solution), Lasso uses iterative coordinate descent. With complex data, 1000 iterations may not be enough.",
+      },
+      {
+        id: "step2",
+        title: "Why default iterations fail",
+        code: `# More features = more iterations needed
+# Smaller alpha = more iterations needed
+# Complex patterns = more iterations needed
+
+# Default: max_iter=1000
+# Often not enough for real data!`,
+        explanation: "The default of 1000 iterations is conservative. Real datasets with many features or small regularization often need 10,000+ iterations.",
+      },
+      {
+        id: "step3",
+        title: "The solution: increase max_iter",
+        code: `lasso = Lasso(alpha=0.01, max_iter=10000)
+lasso.fit(X_train, y_train)
+# No warning - converged successfully!`,
+        explanation: "Setting max_iter=10000 gives the algorithm enough iterations to converge. This is standard practice for Lasso.",
+      },
+      {
+        id: "step4",
+        title: "Best practice: use LassoCV with high max_iter",
+        code: `from sklearn.linear_model import LassoCV
+
+lasso_cv = LassoCV(cv=5, max_iter=10000)
+lasso_cv.fit(X_train, y_train)`,
+        explanation: "LassoCV handles both alpha selection AND convergence. Always set max_iter high enough to avoid issues.",
+      },
+    ],
+    dragDropExercise: {
+      blocks: [
+        { id: "b1", code: "from sklearn.linear_model import Lasso", label: "Import Lasso" },
+        { id: "b2", code: "# Set max_iter high enough for convergence", label: "Plan for iterations" },
+        { id: "b3", code: "lasso = Lasso(alpha=0.01, max_iter=10000)", label: "Create with high max_iter" },
+        { id: "b4", code: "lasso.fit(X_train_scaled, y_train)", label: "Fit model" },
+        { id: "b5", code: "print('Converged without warning!')", label: "Verify success" },
+      ],
+      correctOrder: ["b1", "b2", "b3", "b4", "b5"],
+      hints: [
+        "Import comes first.",
+        "Plan for convergence by setting max_iter before creating the model.",
+        "Create the model with sufficient iterations, then fit it.",
+      ],
+    },
+    runnableCode: `# Demonstrating max_iter importance for Lasso
+from sklearn.linear_model import Lasso
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
+import numpy as np
+import warnings
+
+# Generate complex data
+np.random.seed(42)
+X = np.random.randn(200, 15)  # Many features
+y = X[:, 0] * 3 + X[:, 1] * 2 - X[:, 2] * 1.5 + np.random.randn(200) * 0.3
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Low max_iter - might not converge
+print("=== Low max_iter (default 1000) ===")
+with warnings.catch_warnings(record=True) as w:
+    warnings.simplefilter("always")
+    lasso_low = Lasso(alpha=0.001, max_iter=1000)
+    lasso_low.fit(X_train_scaled, y_train)
+    if w:
+        print(f"Warning: {w[0].message}")
+    else:
+        print("Converged (but might be lucky)")
+
+# High max_iter - reliable convergence
+print("\\n=== High max_iter (10000) ===")
+lasso_high = Lasso(alpha=0.001, max_iter=10000)
+lasso_high.fit(X_train_scaled, y_train)
+print("Converged successfully!")
+
+print(f"\\nTest R²: {r2_score(y_test, lasso_high.predict(X_test_scaled)):.4f}")
+print("\\nAlways use max_iter=10000 for Lasso!")`,
+  },
+
+  // Exercise 3: Pipeline for production
+  {
+    id: "m5-production-pipeline",
+    title: "Pipelines: From Training to Production",
+    description: "Learn why pipelines are essential for deploying ML models correctly.",
+    steps: [
+      {
+        id: "step1",
+        title: "The problem: manual steps in production",
+        code: `# Training (manual steps)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+model = Lasso(alpha=0.1)
+model.fit(X_train_scaled, y_train)
+
+# Production...
+# Did we save the scaler?
+# Are we using the right one?
+# Did we call transform or fit_transform?`,
+        explanation: "Manual preprocessing is error-prone. In production, it's easy to forget a step, use the wrong scaler, or accidentally call fit_transform instead of transform.",
+      },
+      {
+        id: "step2",
+        title: "The solution: Pipeline encapsulates everything",
+        code: `from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('model', Lasso(alpha=0.1, max_iter=10000))
+])`,
+        explanation: "A Pipeline bundles all preprocessing steps with the model. It's a single object that handles everything automatically.",
+      },
+      {
+        id: "step3",
+        title: "Fit the pipeline once",
+        code: `# One call does everything correctly
+pipeline.fit(X_train, y_train)
+
+# Scaler was fit on X_train
+# Model was fit on scaled data
+# All handled automatically!`,
+        explanation: "When you call fit() on a pipeline, it fits each step in order using the correct data. The scaler learns from X_train, transforms it, then the model fits on the scaled result.",
+      },
+      {
+        id: "step4",
+        title: "Deploy with confidence",
+        code: `# Production is now foolproof
+def predict_sales(new_product_data):
+    return pipeline.predict(new_product_data)
+
+# Pipeline automatically:
+# 1. Scales new data using training parameters
+# 2. Passes scaled data to model
+# 3. Returns predictions`,
+        explanation: "In production, just call pipeline.predict(). It automatically applies the same preprocessing that was used during training. No manual steps, no errors.",
+      },
+    ],
+    dragDropExercise: {
+      blocks: [
+        { id: "b1", code: "from sklearn.pipeline import Pipeline", label: "Import Pipeline" },
+        { id: "b2", code: "pipeline = Pipeline([('scaler', StandardScaler()), ('model', Lasso(alpha=0.1))])", label: "Create pipeline" },
+        { id: "b3", code: "pipeline.fit(X_train, y_train)", label: "Fit pipeline" },
+        { id: "b4", code: "predictions = pipeline.predict(X_test)", label: "Predict (auto-scales)" },
+        { id: "b5", code: "# Deploy: just use pipeline.predict(new_data)", label: "Production ready!" },
+      ],
+      correctOrder: ["b1", "b2", "b3", "b4", "b5"],
+      hints: [
+        "Import Pipeline first.",
+        "Create a pipeline with preprocessing and model steps.",
+        "Fit the entire pipeline on raw training data.",
+        "Predict on raw test data - pipeline handles scaling internally.",
+      ],
+    },
+    runnableCode: `# Pipeline: Training to Production
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import Lasso
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
+import numpy as np
+
+# Generate sample data
+np.random.seed(42)
+X = np.random.randn(150, 5) * np.array([100, 1, 0.01, 10, 50])  # Different scales!
+y = X[:, 0] * 0.5 + X[:, 1] * 2 - X[:, 2] * 100 + np.random.randn(150)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# The wrong way (manual, error-prone)
+print("=== Manual Approach (Error-Prone) ===")
+scaler_manual = StandardScaler()
+X_train_scaled = scaler_manual.fit_transform(X_train)
+model_manual = Lasso(alpha=0.1, max_iter=10000)
+model_manual.fit(X_train_scaled, y_train)
+# In production, you'd need to remember to:
+# 1. Save scaler_manual
+# 2. Call transform (not fit_transform) on new data
+# 3. Use the same model
+print("Lots of manual steps to track!")
+
+# The right way (Pipeline)
+print("\\n=== Pipeline Approach (Robust) ===")
+pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('model', Lasso(alpha=0.1, max_iter=10000))
+])
+
+# One fit call does everything
+pipeline.fit(X_train, y_train)
+
+# Predict on raw test data - pipeline handles scaling!
+predictions = pipeline.predict(X_test)
+r2 = r2_score(y_test, predictions)
+print(f"Test R²: {r2:.4f}")
+
+# Simulate production use
+print("\\n=== Production Deployment ===")
+new_product = np.array([[250, 4.5, 0.02, 15, 75]])  # New data point
+predicted_sales = pipeline.predict(new_product)
+print(f"Predicted sales for new product: {predicted_sales[0]:.2f}")
+print("\\nPipeline handles all preprocessing automatically!")`,
+  },
 ];
 
 // Export all exercises by module
