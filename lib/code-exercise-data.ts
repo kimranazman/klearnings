@@ -1261,6 +1261,212 @@ print(f"\\nTest R² - Linear: {r2_score(y_test, lr.predict(X_test)):.3f}")
 print(f"Test R² - Ridge: {r2_score(y_test, ridge.predict(X_test)):.3f}")
 print(f"Test R² - Lasso: {r2_score(y_test, lasso.predict(X_test)):.3f}")`,
   },
+
+  // Exercise 2: LassoCV for automatic alpha selection
+  {
+    id: "m4-lassocv",
+    title: "LassoCV: Finding Optimal Regularization Strength",
+    description: "Learn to use cross-validation to automatically find the best alpha value.",
+    steps: [
+      {
+        id: "step1",
+        title: "The problem: guessing alpha is unreliable",
+        code: `# Bad approach - guessing
+model = Lasso(alpha=1.0)  # Why 1.0?
+# Maybe too strong (underfits)
+# Maybe too weak (overfits)
+# We're just guessing!`,
+        explanation: "Manually choosing alpha is like shooting in the dark. The optimal value depends on your specific data, features, and noise level.",
+      },
+      {
+        id: "step2",
+        title: "The solution: LassoCV tests multiple alphas",
+        code: `from sklearn.linear_model import LassoCV
+
+# Let CV find the best alpha
+model = LassoCV(
+    alphas=[0.001, 0.01, 0.1, 1.0, 10.0],
+    cv=5
+)`,
+        explanation: "LassoCV takes a list of candidate alphas and uses k-fold cross-validation to evaluate each one. It automatically selects the best.",
+      },
+      {
+        id: "step3",
+        title: "Fit and get the optimal alpha",
+        code: `model.fit(X_train_scaled, y_train)
+print(f"Best alpha: {model.alpha_}")`,
+        explanation: "After fitting, model.alpha_ contains the optimal value found by cross-validation. This alpha gave the best average score across all folds.",
+      },
+      {
+        id: "step4",
+        title: "Use the auto-tuned model",
+        code: `# Model is already fitted with best alpha!
+predictions = model.predict(X_test_scaled)
+print(f"R²: {r2_score(y_test, predictions):.3f}")`,
+        explanation: "LassoCV automatically refits on all training data using the best alpha. You can use it directly for predictions.",
+      },
+    ],
+    dragDropExercise: {
+      blocks: [
+        { id: "b1", code: "from sklearn.linear_model import LassoCV", label: "Import LassoCV" },
+        { id: "b2", code: "alphas = [0.001, 0.01, 0.1, 1.0, 10.0]", label: "Define alpha candidates" },
+        { id: "b3", code: "model = LassoCV(alphas=alphas, cv=5)", label: "Create LassoCV" },
+        { id: "b4", code: "model.fit(X_train_scaled, y_train)", label: "Fit (finds best alpha)" },
+        { id: "b5", code: "print(f'Best alpha: {model.alpha_}')", label: "Check best alpha" },
+      ],
+      correctOrder: ["b1", "b2", "b3", "b4", "b5"],
+      hints: [
+        "Import before using.",
+        "Define your candidate alphas before creating the model.",
+        "Create the model with alphas and cv, then fit it.",
+        "After fitting, you can access the optimal alpha via .alpha_",
+      ],
+    },
+    runnableCode: `# LassoCV: Automatic alpha tuning
+from sklearn.linear_model import Lasso, LassoCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
+import numpy as np
+
+# Generate data
+np.random.seed(42)
+X = np.random.randn(150, 8)
+y = X[:, 0] * 3 + X[:, 1] * 2 - X[:, 2] * 1.5 + np.random.randn(150) * 0.5
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Scale features (important for regularization!)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Compare guessed alpha vs LassoCV
+print("=== Guessing Alpha (Bad) ===")
+guessed = Lasso(alpha=1.0)
+guessed.fit(X_train_scaled, y_train)
+print(f"Guessed alpha: 1.0")
+print(f"Test R²: {r2_score(y_test, guessed.predict(X_test_scaled)):.4f}")
+
+print("\\n=== LassoCV (Good) ===")
+alphas = [0.001, 0.01, 0.1, 1.0, 10.0]
+lasso_cv = LassoCV(alphas=alphas, cv=5)
+lasso_cv.fit(X_train_scaled, y_train)
+print(f"Best alpha found: {lasso_cv.alpha_}")
+print(f"Test R²: {r2_score(y_test, lasso_cv.predict(X_test_scaled)):.4f}")
+
+print("\\nLassoCV finds the optimal alpha automatically!")`,
+  },
+
+  // Exercise 3: Ridge vs Lasso for feature selection
+  {
+    id: "m4-feature-selection",
+    title: "Choosing Ridge vs Lasso for Feature Selection",
+    description: "Learn when to use Ridge (keep all features) vs Lasso (eliminate features).",
+    steps: [
+      {
+        id: "step1",
+        title: "The scenario: 50 features, but many might be useless",
+        code: `# You have lots of features
+# price, rating, reviews, category, color,
+# warehouse_location, competitor_price, ...
+#
+# Question: Do all 50 features help?
+# Or are some just noise?`,
+        explanation: "In real projects, you often have many features but suspect some don't contribute to predictions. The wrong choice of regularization can hurt your model.",
+      },
+      {
+        id: "step2",
+        title: "Ridge: keeps ALL features",
+        code: `ridge = Ridge(alpha=10.0)
+ridge.fit(X_train, y_train)
+
+# Count non-zero coefficients
+print(np.sum(ridge.coef_ != 0))  # Always 50!`,
+        explanation: "Ridge (L2) shrinks coefficients toward zero but NEVER sets them exactly to zero. If you have 50 features, Ridge keeps all 50.",
+      },
+      {
+        id: "step3",
+        title: "Lasso: eliminates unimportant features",
+        code: `lasso = Lasso(alpha=0.1)
+lasso.fit(X_train, y_train)
+
+# Count non-zero coefficients
+print(np.sum(lasso.coef_ != 0))  # Maybe 15!`,
+        explanation: "Lasso (L1) can set coefficients exactly to zero, eliminating features entirely. It performs automatic feature selection.",
+      },
+      {
+        id: "step4",
+        title: "When to use which?",
+        code: `# Use RIDGE when:
+# - You believe all features might contribute
+# - Features are correlated (Lasso arbitrarily picks one)
+
+# Use LASSO when:
+# - You suspect many features are noise
+# - You want automatic feature selection
+# - You need a simpler, more interpretable model`,
+        explanation: "The choice depends on your data. Ridge is more stable with correlated features; Lasso is better for feature selection and interpretability.",
+      },
+    ],
+    dragDropExercise: {
+      blocks: [
+        { id: "b1", code: "# I have 50 features but suspect many are noise", label: "Problem statement" },
+        { id: "b2", code: "lasso = Lasso(alpha=0.1)  # L1 for feature selection", label: "Choose Lasso" },
+        { id: "b3", code: "lasso.fit(X_train_scaled, y_train)", label: "Fit Lasso" },
+        { id: "b4", code: "important_features = np.where(lasso.coef_ != 0)[0]", label: "Find surviving features" },
+        { id: "b5", code: "print(f'{len(important_features)} features selected')", label: "Report selection" },
+      ],
+      correctOrder: ["b1", "b2", "b3", "b4", "b5"],
+      hints: [
+        "Start by understanding the problem - too many potential noise features.",
+        "Lasso is the right choice for feature selection (L1 penalty zeros out features).",
+        "Fit the model, then examine which coefficients are non-zero.",
+        "Report how many features survived the selection process.",
+      ],
+    },
+    runnableCode: `# Ridge vs Lasso: Feature Selection Comparison
+from sklearn.linear_model import Ridge, Lasso
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+import numpy as np
+
+# Create data with 20 features, but only 5 are important
+np.random.seed(42)
+n_samples, n_features = 200, 20
+X = np.random.randn(n_samples, n_features)
+
+# True relationship: only first 5 features matter
+y = (X[:, 0] * 3 + X[:, 1] * 2 + X[:, 2] * 1.5
+     - X[:, 3] * 2.5 + X[:, 4] * 1
+     + np.random.randn(n_samples) * 0.5)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Scale features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Ridge (L2)
+print("=== RIDGE (L2) ===")
+ridge = Ridge(alpha=1.0)
+ridge.fit(X_train_scaled, y_train)
+print(f"Non-zero coefficients: {np.sum(ridge.coef_ != 0)}/20")
+print("Ridge keeps ALL features (just shrinks them)")
+
+# Lasso (L1)
+print("\\n=== LASSO (L1) ===")
+lasso = Lasso(alpha=0.1)
+lasso.fit(X_train_scaled, y_train)
+non_zero = np.sum(lasso.coef_ != 0)
+print(f"Non-zero coefficients: {non_zero}/20")
+
+important = np.where(lasso.coef_ != 0)[0]
+print(f"Selected features: {important}")
+print("\\nLasso correctly identified the important features!")
+print("(True important features: 0, 1, 2, 3, 4)")`,
+  },
 ];
 
 // Module 5: Advanced Topics

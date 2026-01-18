@@ -287,6 +287,7 @@ print(f"Best alpha: {model.alpha_}")
 # Automatically tested all alphas with 5-fold CV`}
         wrongExplanation="Manually chosen alpha might be far from optimal. You're leaving performance on the table."
         rightExplanation="LassoCV tests multiple alphas with cross-validation and automatically selects the best one."
+        exercise={module4Exercises[1]}
       />
 
       <h3>Mistake #3: Using Ridge When You Need Feature Selection</h3>
@@ -315,6 +316,7 @@ important = np.where(model.coef_ != 0)[0]
 print(f"Important features: {important}")`}
         wrongExplanation="Ridge never sets coefficients exactly to zero. All 50 features stay in the model."
         rightExplanation="Lasso's L1 penalty drives unimportant coefficients to exactly zero, performing automatic feature selection."
+        exercise={module4Exercises[2]}
       />
 
       <h2>Practice: Tune the Regularization</h2>
